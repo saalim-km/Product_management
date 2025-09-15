@@ -77,16 +77,16 @@ export function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-indigo-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Card className="w-full shadow-xl rounded-2xl overflow-hidden border-0 bg-white">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 w-full"></div>
+          <div className="bg-gradient-to-r from-orange-600 to-orange-600 h-2 w-full"></div>
           <CardHeader className="text-center pb-2">
-            <div className="mx-auto bg-blue-100 rounded-full p-3 w-16 h-16 flex items-center justify-center mb-4">
+            <div className="mx-auto bg-orange-100 rounded-full p-3 w-16 h-16 flex items-center justify-center mb-4">
               {isLogin ? (
-                <User className="h-8 w-8 text-blue-600" />
+                <User className="h-8 w-8 text-orange-600" />
               ) : (
-                <CheckCircle className="h-8 w-8 text-blue-600" />
+                <CheckCircle className="h-8 w-8 text-orange-600" />
               )}
             </div>
             <CardTitle className="text-2xl font-semibold text-gray-800">
@@ -124,7 +124,7 @@ export function AuthPage() {
                           className={`pl-10 ${
                             errors.fullName && touched.fullName
                               ? "border-red-500"
-                              : "border-gray-300 focus:border-blue-500"
+                              : "border-gray-300 focus:border-orange-500"
                           }`}
                         />
                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -155,7 +155,7 @@ export function AuthPage() {
                         className={`pl-10 ${
                           errors.email && touched.email
                             ? "border-red-500"
-                            : "border-gray-300 focus:border-blue-500"
+                            : "border-gray-300 focus:border-orange-500"
                         }`}
                       />
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -185,7 +185,7 @@ export function AuthPage() {
                         className={`pr-10 ${
                           errors.password && touched.password
                             ? "border-red-500"
-                            : "border-gray-300 focus:border-blue-500"
+                            : "border-gray-300 focus:border-orange-500"
                         }`}
                       />
                       <button
@@ -226,7 +226,7 @@ export function AuthPage() {
                           className={`pr-10 ${
                             errors.confirmPassword && touched.confirmPassword
                               ? "border-red-500"
-                              : "border-gray-300 focus:border-blue-500"
+                              : "border-gray-300 focus:border-orange-500"
                           }`}
                         />
                         <button
@@ -253,7 +253,7 @@ export function AuthPage() {
 
                   <Button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -275,7 +275,7 @@ export function AuthPage() {
             <div className="mt-6 text-center">
               <button
                 onClick={toggleAuthMode}
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors flex items-center justify-center w-full"
+                className="text-orange-600 hover:text-orange-800 text-sm font-medium transition-colors flex items-center justify-center w-full"
               >
                 {isLogin
                   ? "Don't have an account? Sign up"

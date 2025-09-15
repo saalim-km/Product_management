@@ -3,12 +3,13 @@ import { IGenerateTokenUsecase, ILoginUsecase, IRegisterUsecase } from "../../do
 import { LoginUsecase } from "../../application/auth/login.usecase";
 import { RegisterUsecase } from "../../application/auth/signup.usecase";
 import { GenerateTokenUsecase } from "../../application/auth/generate-token.usecase";
-import { IEmailExistenceUsecase } from "../../domain/interfaces/usecase/common-usecase.interfaces";
+import { IEmailExistenceUsecase, IRefreshTokenUsecase } from "../../domain/interfaces/usecase/common-usecase.interfaces";
 import { EmailExistenceUsecase } from "../../application/common/email-existence.usecase";
 import { ICategoryUsecasee } from "../../domain/interfaces/usecase/category-usecase.interface";
 import { CategoryUsecase } from "../../application/category/category.usecase";
 import { ISubCategoryUsecasee } from "../../domain/interfaces/usecase/subcategory-usecase.interface";
 import { SubCategoryUsecase } from "../../application/category/sub-category.usecase";
+import { RefreshTokenUsecase } from "../../application/common/refresh-token.usecase";
 
 export class UsecaseRegistry {
     static registerUsecases() {
@@ -34,6 +35,10 @@ export class UsecaseRegistry {
 
         container.register<ISubCategoryUsecasee>("ISubCategoryUsecasee", {
             useClass : SubCategoryUsecase
+        })
+
+        container.register<IRefreshTokenUsecase>("IRefreshTokenUsecase" , {
+            useClass : RefreshTokenUsecase
         })
     }
 }

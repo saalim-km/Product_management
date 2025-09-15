@@ -3,6 +3,7 @@ import { ISubCategoryUsecasee } from "../../domain/interfaces/usecase/subcategor
 import type { ISubcategoryRepository } from "../../domain/interfaces/repository/subcategory.repository";
 import { ICategory } from "../../domain/models/category";
 import { Types } from "mongoose";
+import { ISubCategory } from "../../domain/models/sub-category";
 
 @injectable()
 export class SubCategoryUsecase implements ISubCategoryUsecasee {
@@ -10,11 +11,16 @@ export class SubCategoryUsecase implements ISubCategoryUsecasee {
         @inject("ISubcategoryRepository") private _subCategoryRepo : ISubcategoryRepository
     ){}
 
-    async addSubCategory(input : {categoryId : Types.ObjectId , name : string}): Promise<ICategory> {
+    async addSubCategory(input : {category : Types.ObjectId , name : string}): Promise<ICategory> {
+        console.log("in usecase : ",input);
         return this._subCategoryRepo.create(input);
     }
 
     async deleteSUbCategory(subCatId: Types.ObjectId): Promise<void> {
         await this._subCategoryRepo.delete(subCatId);
+    }
+
+    async getAllSubCategories(): Promise<ISubCategory[]> {
+        return this._subCategoryRepo.findAll({},0,100,-1);
     }
 }

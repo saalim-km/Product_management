@@ -16,7 +16,8 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
 
     async deleteCategory(categoryId: Types.ObjectId): Promise<void> {
         const isSubcategoryLinked = await SubCategory.find({category : categoryId})
-        if(isSubcategoryLinked) {
+        console.log('subcategory linked : ' , isSubcategoryLinked);
+        if(isSubcategoryLinked.length > 0) {
             throw new CustomError(ERROR_MESSAGES.SUBCATEGORY_ALREADY_LINKED,HTTP_STATUS.BAD_REQUEST)
         }
 
