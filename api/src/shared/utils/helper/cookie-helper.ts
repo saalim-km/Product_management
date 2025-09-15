@@ -37,10 +37,8 @@ export const updateCookieWithAccessToken = (
 
 export const clearAuthCookies = (
     res: Response,
-    accessTokenName: string,
-    refreshTokenName: string
   ) => {
-    res.clearCookie(accessTokenName);
-    res.clearCookie(refreshTokenName);
+    res.clearCookie("user_AT");
+    res.clearCookie("user_RT");
 };
   
