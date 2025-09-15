@@ -2,10 +2,10 @@ import { inject, injectable } from "tsyringe";
 import { CustomError } from "../../shared/utils/helper/custom-error";
 import { ERROR_MESSAGES, HTTP_STATUS } from "../../shared/constants/constant";
 import { RegisterUserInput } from "../../domain/interfaces/usecase/types/auth.types";
-import { IEmailExistenceUsecase } from "../../domain/interfaces/usecase/common-usecase.interfaces";
-import { IBcryptService } from "../../domain/interfaces/service/bcrypt-service.interface";
+import type { IEmailExistenceUsecase } from "../../domain/interfaces/usecase/common-usecase.interfaces";
+import type { IBcryptService } from "../../domain/interfaces/service/bcrypt-service.interface";
 import { IUser } from "../../domain/models/user";
-import { IUserRepository } from "../../domain/interfaces/repository/user.repository";
+import type { IUserRepository } from "../../domain/interfaces/repository/user.repository";
 import { IRegisterUsecase } from "../../domain/interfaces/usecase/auth-usecase.interface";
 
 @injectable()

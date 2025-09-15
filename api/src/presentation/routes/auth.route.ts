@@ -6,7 +6,7 @@ import { BaseRoute } from "./base.route";
 export class AuthRoute extends BaseRoute {
     protected initializeRoutes(): void {
         this.router
-        .post('/register',registrationRateLimit,asyncHandler(authController.register))
-        .post('/login',authRateLimit,asyncHandler(authController.login))
+        .post('/register',registrationRateLimit,asyncHandler(authController.register.bind(authController)))
+        .post('/login',authRateLimit,asyncHandler(authController.login.bind(authController)))
     }
 }

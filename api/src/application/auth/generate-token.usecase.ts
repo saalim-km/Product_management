@@ -1,5 +1,5 @@
 import { inject, injectable } from "tsyringe";
-import { IJwtservice } from "../../domain/interfaces/service/jwt-service.interface";
+import type { IJwtservice } from "../../domain/interfaces/service/jwt-service.interface";
 import { JwtOutput, TJwtPayload } from "../../domain/types/auth.types";
 import { IGenerateTokenUsecase } from "../../domain/interfaces/usecase/auth-usecase.interface";
 

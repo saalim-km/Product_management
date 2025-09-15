@@ -36,6 +36,7 @@ export const config = {
     AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '',
     AWS_REGION: process.env.AWS_REGION || 'ap-south-1',
     AWS_BUCKET_NAME : process.env.BUCKET_NAME || '',
+    PRODUCTS : "products"
   },
 
   redis : {

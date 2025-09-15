@@ -1,7 +1,7 @@
-import { inject } from "tsyringe";
+import { inject, injectable } from "tsyringe";
 import { Request, Response } from "express";
 
-import {
+import type {
   IGenerateTokenUsecase,
   ILoginUsecase,
   IRegisterUsecase,
@@ -13,8 +13,10 @@ import {
 import { setAuthCookies } from "../../shared/utils/helper/cookie-helper";
 import { ResponseHandler } from "../../shared/utils/helper/response-handler";
 import { SUCCESS_MESSAGES } from "../../shared/constants/constant";
+import { IAuthController } from "../../domain/interfaces/controller/auth-controller.interface";
 
-export class AuthController {
+@injectable()
+export class AuthController implements IAuthController {
   constructor(
     @inject("ILoginUsecase") private _loginUsecase: ILoginUsecase,
     @inject("IRegisterUsecase") private _registerUsecase: IRegisterUsecase,
@@ -24,7 +26,10 @@ export class AuthController {
 
   async login(req: Request, res: Response): Promise<void> {
     const payload = userLoginSchema.parse(req.body);
-
+    console.log('parsed data');
+    console.log(payload);
+    console.log('logging the login usecase');
+    console.log(this._loginUsecase);
     const user = await this._loginUsecase.login(payload);
 
     const tokens = await this._generateToken.generateToken({

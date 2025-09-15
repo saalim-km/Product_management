@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { IGetPresignedUrlUsecase } from "../../domain/interfaces/usecase/common-usecase.interfaces";
-import { IAwsS3Service } from "../../domain/interfaces/service/aws-service.interface";
-import { IRedisService } from "../../domain/interfaces/service/redis-service.interface";
+import type{ IAwsS3Service } from "../../domain/interfaces/service/aws-service.interface";
+import type { IRedisService } from "../../domain/interfaces/service/redis-service.interface";
 import logger from "../../shared/logger/logger";
 const DEFAULT_TTL = 86400;
 

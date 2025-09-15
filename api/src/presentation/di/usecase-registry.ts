@@ -3,10 +3,12 @@ import { IGenerateTokenUsecase, ILoginUsecase, IRegisterUsecase } from "../../do
 import { LoginUsecase } from "../../application/auth/login.usecase";
 import { RegisterUsecase } from "../../application/auth/signup.usecase";
 import { GenerateTokenUsecase } from "../../application/auth/generate-token.usecase";
+import { IEmailExistenceUsecase } from "../../domain/interfaces/usecase/common-usecase.interfaces";
+import { EmailExistenceUsecase } from "../../application/common/email-existence.usecase";
 
 export class UsecaseRegistry {
     static registerUsecases() {
-        container.register<ILoginUsecase>('ILoginUser', {
+        container.register<ILoginUsecase>('ILoginUsecase', {
             useClass : LoginUsecase
         })
 
@@ -16,6 +18,10 @@ export class UsecaseRegistry {
 
         container.register<IGenerateTokenUsecase>("IGenerateTokenUsecase" , {
             useClass : GenerateTokenUsecase
+        })
+
+        container.register<IEmailExistenceUsecase>("IEmailExistenceUsecase" , {
+            useClass : EmailExistenceUsecase
         })
     }
 }

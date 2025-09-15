@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { LoginUserInput, LoginUserOuput } from "../../domain/interfaces/usecase/types/auth.types";
-import { IBcryptService } from "../../domain/interfaces/service/bcrypt-service.interface";
-import { IEmailExistenceUsecase, IGetPresignedUrlUsecase } from "../../domain/interfaces/usecase/common-usecase.interfaces";
+import type { IBcryptService } from "../../domain/interfaces/service/bcrypt-service.interface";
+import type { IEmailExistenceUsecase } from "../../domain/interfaces/usecase/common-usecase.interfaces";
 import { ERROR_MESSAGES, HTTP_STATUS } from "../../shared/constants/constant";
 import { CustomError } from "../../shared/utils/helper/custom-error";
 import { Mapper } from "../../shared/utils/mapper";
@@ -12,7 +12,9 @@ export class LoginUsecase implements ILoginUsecase {
     constructor(
         @inject('IEmailExistenceUsecase') private _emailExistenceUsecase : IEmailExistenceUsecase,
         @inject('IBcryptService') private _bcryptService : IBcryptService,
-    ){}
+    ){
+        console.log('login usecase instantiated !!');
+    }
     async login(input : LoginUserInput): Promise<LoginUserOuput> {
         const {email , password} = input;
         const client = await this._emailExistenceUsecase.doesEmailExist(email);
