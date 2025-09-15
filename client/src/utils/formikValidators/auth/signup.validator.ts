@@ -1,28 +1,22 @@
 import * as Yup from "yup";
 
 export const signupSchema = Yup.object().shape({
-  name: Yup.string()
-    .min(6, "Name must be at least 6 characters long")
-    .matches(
-      /^(?!\s+$)[A-Za-z\s]+$/,
-      "Name can only contain letters and spaces (not only spaces)"
-    )
-    .required("Name is required"),
+  fullName: Yup.string()
+    .required("Full name is required")
+    .min(2, "Full name must be at least 2 characters")
+    .max(50, "Full name cannot exceed 50 characters")
+    .matches(/^[a-zA-Z\s]*$/, "Full name can only contain letters and spaces"),
   email: Yup.string()
-    .email("Invalid email format")
-    .matches(
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|in|org|net|edu|gov)$/,
-      "Email must end with .com, .in, .org, etc."
-    )
+    .email("Invalid email address")
     .required("Email is required"),
   password: Yup.string()
+    .required("Password is required")
     .min(8, "Password must be at least 8 characters")
-    .matches(/[a-z]/, "Must include a lowercase letter")
-    .matches(/[A-Z]/, "Must include an uppercase letter")
-    .matches(/[0-9]/, "Must include a number")
-    .matches(/[\W_]/, "Must include a special character")
-    .required("Password is required"),
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+    ),
   confirmPassword: Yup.string()
-    .oneOf([Yup.ref("password"), ""], "Passwords must match")
-    .required("Confirm password is required"),
+    .required("Please confirm your password")
+    .oneOf([Yup.ref("password")], "Passwords must match"),
 });

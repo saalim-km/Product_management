@@ -1,44 +1,36 @@
-    // src/store/userSlice.ts
-import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { createSlice } from "@reduxjs/toolkit";
 
-// --- Types ---
-interface UserState {
-  name: string | null
-  email: string | null
+type user = {
+  _id: string;
+  name: string;
+  email: string;
+};
+
+interface IuserState {
+  user: user | null;
 }
 
-// --- Load from localStorage ---
-const loadUserFromStorage = (): UserState => {
-  try {
-    const stored = localStorage.getItem("user")
-    if (stored) return JSON.parse(stored)
-  } catch (err) {
-    console.error("Failed to parse user from localStorage:", err)
-  }
-  return { name: null, email: null }
-}
+const initialState: IuserState = {
+  user: JSON.parse(localStorage.getItem("userSession") || "null"),
+};
 
-// --- Initial State ---
-const initialState: UserState = loadUserFromStorage()
-
-// --- Slice ---
-const userSlice = createSlice({
+const clientSlice = createSlice({
   name: "user",
-  initialState,
+  initialState: initialState,
   reducers: {
-    login: (state, action: PayloadAction<{ name: string; email: string }>) => {
-      state.name = action.payload.name
-      state.email = action.payload.email
-      localStorage.setItem("user", JSON.stringify(state))
+    userLogin: (state, action) => {
+      state.user = action.payload;
+      localStorage.setItem("userSession", JSON.stringify(action.payload));
     },
-    logout: (state) => {
-      state.name = null
-      state.email = null
-      localStorage.removeItem("user")
+    userLogout: (state) => {
+      state.user = null;
+      localStorage.removeItem("userSession");
     },
   },
-})
+});
 
-// --- Exports ---
-export const { login, logout } = userSlice.actions
-export default userSlice.reducer
+const { userLogin, userLogout } = clientSlice.actions;
+
+export { userLogin, userLogout };
+
+export default clientSlice.reducer;

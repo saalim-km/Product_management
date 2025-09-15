@@ -1,237 +1,291 @@
-    "use client"
+"use client";
 
-import { useState } from "react"
-import { Formik, Form, Field } from "formik"
-import { User, Mail, Lock } from "lucide-react"
-import { Button } from "../components/ui/button"
-import { Input } from "../components/ui/input"
-import { loginSchema } from "../utils/formikValidators/auth/login.validator"
-import { signupSchema } from "../utils/formikValidators/auth/signup.validator"
+import { useState } from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import {
+  Eye,
+  EyeOff,
+  User,
+  Mail,
+  Lock,
+  ArrowRight,
+  CheckCircle,
+} from "lucide-react";
+import { Label } from "../components/ui/label";
+import { Button } from "../components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { useDispatch } from "react-redux";
+import { AuthService } from "../services/auth.service";
+import { loginSchema } from "../utils/formikValidators/auth/login.validator";
+import { signupSchema } from "../utils/formikValidators/auth/signup.validator";
+import { handleError } from "../utils/error/error-handler.utils";
+import { toast } from "sonner";
+import { userLogin } from "../store/slices/user.slice";
 
-export default function AuthForm() {
-  const [isSignUp, setIsSignUp] = useState(false)
+export function AuthPage() {
+  const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const dispatch = useDispatch();
 
-  const toggleMode = () => {
-    setIsSignUp(!isSignUp)
-  }
+  const initialValues = {
+    email: "",
+    password: "",
+    confirmPassword: "",
+    fullName: "",
+  };
 
-  type LoginValues = { email: string; password: string }
-  type SignupValues = { name: string; email: string; password: string; confirmPassword: string }
-  type FormValues = LoginValues | SignupValues
+  const handleSubmit = async (values: typeof initialValues) => {
+    setIsSubmitting(true);
 
-  const handleSubmit = (values: FormValues, { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void }) => {
-    console.log("Form submitted:", values)
-    setSubmitting(false)
-  }
+    if (isLogin) {
+      try {
+        const res = await AuthService.login(values.email, values.password);
+        toast.success("Logged in successfully!");
+        dispatch(userLogin(res.data))
+      } catch (error) {
+        handleError(error);
+        setIsSubmitting(false)
+      }
+    } else {
+      try {
+        await AuthService.register(
+          values.fullName,
+          values.email,
+          values.password
+        );
+        toast.success("Account created successfully!");
+        setIsLogin(true);
+        setIsSubmitting(false)
+      } catch (error) {
+        handleError(error);
+        setIsSubmitting(false)
+      }
+    }
+  };
+
+  const toggleAuthMode = () => {
+    setIsLogin(!isLogin);
+  };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side */}
-      <div
-        className={`flex-1 flex items-center justify-center transition-all duration-500 ${
-          isSignUp ? "bg-white" : "bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600 relative overflow-hidden"
-        }`}
-      >
-        {/* Decorative shapes for blue background */}
-        {!isSignUp && (
-          <>
-            <div className="absolute top-20 right-20 w-16 h-16 bg-blue-400/20 rotate-45"></div>
-            <div className="absolute bottom-40 left-20 w-32 h-32 bg-blue-300/10 rounded-full"></div>
-            <div className="absolute top-1/2 left-10 w-20 h-20 bg-blue-500/15 rotate-12"></div>
-            <div className="absolute bottom-20 right-40 w-0 h-0 border-l-[30px] border-r-[30px] border-b-[50px] border-l-transparent border-r-transparent border-b-blue-400/20"></div>
-          </>
-        )}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Card className="w-full shadow-xl rounded-2xl overflow-hidden border-0 bg-white">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 h-2 w-full"></div>
+          <CardHeader className="text-center pb-2">
+            <div className="mx-auto bg-blue-100 rounded-full p-3 w-16 h-16 flex items-center justify-center mb-4">
+              {isLogin ? (
+                <User className="h-8 w-8 text-blue-600" />
+              ) : (
+                <CheckCircle className="h-8 w-8 text-blue-600" />
+              )}
+            </div>
+            <CardTitle className="text-2xl font-semibold text-gray-800">
+              {isLogin ? "Welcome Back" : "Create Account"}
+            </CardTitle>
+            <CardDescription className="text-gray-500 mt-2">
+              {isLogin
+                ? "Sign in to continue to your Product Management account"
+                : "Get started with your Product Management account"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <Formik
+              initialValues={initialValues}
+              validationSchema={isLogin ? loginSchema : signupSchema}
+              onSubmit={handleSubmit}
+            >
+              {({ errors, touched }) => (
+                <Form className="space-y-4">
+                  {!isLogin && (
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="fullName"
+                        className="text-gray-700 flex items-center"
+                      >
+                        <User className="h-4 w-4 mr-1" />
+                        Full Name
+                      </Label>
+                      <div className="relative">
+                        <Field
+                          as={Input}
+                          id="fullName"
+                          name="fullName"
+                          placeholder="Enter your full name"
+                          className={`pl-10 ${
+                            errors.fullName && touched.fullName
+                              ? "border-red-500"
+                              : "border-gray-300 focus:border-blue-500"
+                          }`}
+                        />
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      </div>
+                      <ErrorMessage
+                        name="fullName"
+                        component="div"
+                        className="text-red-500 text-sm flex items-center mt-1"
+                      />
+                    </div>
+                  )}
 
-        <div className="w-full max-w-md px-8">
-          {isSignUp ? (
-            // Sign In Form (when in signup mode, left side shows sign in)
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-orange-500 mb-2">Sign In to</h2>
-              <h2 className="text-3xl font-bold text-orange-500 mb-8">Your Account</h2>
-
-              <Formik
-                initialValues={{ email: "", password: "" }}
-                validationSchema={loginSchema}
-                onSubmit={handleSubmit}
-              >
-                {({ errors, touched, isSubmitting }) => (
-                  <Form className="space-y-6">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="email"
+                      className="text-gray-700 flex items-center"
+                    >
+                      <Mail className="h-4 w-4 mr-1" />
+                      Email
+                    </Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                       <Field
                         as={Input}
-                        type="email"
+                        id="email"
                         name="email"
-                        placeholder="Email"
-                        className="pl-12 h-12 bg-gray-100 border-0 rounded-full"
+                        type="email"
+                        placeholder="Enter your email"
+                        className={`pl-10 ${
+                          errors.email && touched.email
+                            ? "border-red-500"
+                            : "border-gray-300 focus:border-blue-500"
+                        }`}
                       />
-                      {errors.email && touched.email && <div className="text-red-500 text-sm mt-1">{errors.email}</div>}
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     </div>
+                    <ErrorMessage
+                      name="email"
+                      component="div"
+                      className="text-red-500 text-sm flex items-center mt-1"
+                    />
+                  </div>
 
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="password"
+                      className="text-gray-700 flex items-center"
+                    >
+                      <Lock className="h-4 w-4 mr-1" />
+                      Password
+                    </Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                       <Field
                         as={Input}
-                        type="password"
+                        id="password"
                         name="password"
-                        placeholder="Password"
-                        className="pl-12 h-12 bg-gray-100 border-0 rounded-full"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        className={`pr-10 ${
+                          errors.password && touched.password
+                            ? "border-red-500"
+                            : "border-gray-300 focus:border-blue-500"
+                        }`}
                       />
-                      {errors.password && touched.password && (
-                        <div className="text-red-500 text-sm mt-1">{errors.password}</div>
-                      )}
-                    </div>
-
-                    <div className="text-center">
-                      <button type="button" className="text-sm text-gray-600 underline">
-                        forgot password?
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
+                    <ErrorMessage
+                      name="password"
+                      component="div"
+                      className="text-red-500 text-sm flex items-center mt-1"
+                    />
+                  </div>
 
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full font-semibold"
-                    >
-                      SIGN IN
-                    </Button>
-                  </Form>
-                )}
-              </Formik>
-            </div>
-          ) : (
-            // Welcome Back (when in login mode, left side shows welcome)
-            <div className="text-center text-white">
-              <h1 className="text-4xl font-bold mb-6">Welcome Back!</h1>
-              <p className="text-blue-100 mb-8 leading-relaxed">
-                To keep connected with us please
-                <br />
-                login with your personal info
-              </p>
-              <Button
-                onClick={toggleMode}
-                variant="outline"
-                className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-blue-800 px-12 py-3 rounded-full font-semibold"
-              >
-                SIGN IN
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Right Side */}
-      <div
-        className={`flex-1 flex items-center justify-center transition-all duration-500 ${
-          isSignUp ? "bg-gradient-to-br from-blue-900 via-blue-800 to-blue-600 relative overflow-hidden" : "bg-white"
-        }`}
-      >
-        {/* Decorative shapes for blue background */}
-        {isSignUp && (
-          <>
-            <div className="absolute top-20 left-20 w-16 h-16 bg-blue-400/20 rotate-45"></div>
-            <div className="absolute bottom-40 right-20 w-32 h-32 bg-blue-300/10 rounded-full"></div>
-            <div className="absolute top-1/2 right-10 w-20 h-20 bg-blue-500/15 rotate-12"></div>
-            <div className="absolute bottom-20 left-40 w-0 h-0 border-l-[30px] border-r-[30px] border-b-[50px] border-l-transparent border-r-transparent border-b-blue-400/20"></div>
-          </>
-        )}
-
-        <div className="w-full max-w-md px-8">
-          {isSignUp ? (
-            // Hello Friend (when in signup mode, right side shows hello friend)
-            <div className="text-center text-white">
-              <h1 className="text-4xl font-bold mb-6">Hello Friend!</h1>
-              <p className="text-blue-100 mb-8 leading-relaxed">
-                Enter your personal details and
-                <br />
-                start your journey with us
-              </p>
-              <Button
-                onClick={toggleMode}
-                variant="outline"
-                className="border-2 border-white text-white bg-transparent hover:bg-white hover:text-blue-800 px-12 py-3 rounded-full font-semibold"
-              >
-                SIGN UP
-              </Button>
-            </div>
-          ) : (
-            // Create Account Form (when in login mode, right side shows create account)
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-orange-500 mb-8">Create Account</h2>
-
-              <Formik
-                initialValues={{ name: "", email: "", password: "", confirmPassword: "" }}
-                validationSchema={signupSchema}
-                onSubmit={handleSubmit}
-              >
-                {({ errors, touched, isSubmitting }) => (
-                  <Form className="space-y-6">
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <Field
-                        as={Input}
-                        type="text"
-                        name="name"
-                        placeholder="Name"
-                        className="pl-12 h-12 bg-gray-100 border-0 rounded-full"
-                      />
-                      {errors.name && touched.name && <div className="text-red-500 text-sm mt-1">{errors.name}</div>}
-                    </div>
-
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <Field
-                        as={Input}
-                        type="email"
-                        name="email"
-                        placeholder="Email"
-                        className="pl-12 h-12 bg-gray-100 border-0 rounded-full"
-                      />
-                      {errors.email && touched.email && <div className="text-red-500 text-sm mt-1">{errors.email}</div>}
-                    </div>
-
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <Field
-                        as={Input}
-                        type="password"
-                        name="password"
-                        placeholder="Password"
-                        className="pl-12 h-12 bg-gray-100 border-0 rounded-full"
-                      />
-                      {errors.password && touched.password && (
-                        <div className="text-red-500 text-sm mt-1">{errors.password}</div>
-                      )}
-                    </div>
-
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <Field
-                        as={Input}
-                        type="password"
+                  {!isLogin && (
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="confirmPassword"
+                        className="text-gray-700 flex items-center"
+                      >
+                        <Lock className="h-4 w-4 mr-1" />
+                        Confirm Password
+                      </Label>
+                      <div className="relative">
+                        <Field
+                          as={Input}
+                          id="confirmPassword"
+                          name="confirmPassword"
+                          type={showConfirmPassword ? "text" : "password"}
+                          placeholder="Confirm your password"
+                          className={`pr-10 ${
+                            errors.confirmPassword && touched.confirmPassword
+                              ? "border-red-500"
+                              : "border-gray-300 focus:border-blue-500"
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                      <ErrorMessage
                         name="confirmPassword"
-                        placeholder="Confirm Password"
-                        className="pl-12 h-12 bg-gray-100 border-0 rounded-full"
+                        component="div"
+                        className="text-red-500 text-sm flex items-center mt-1"
                       />
-                      {errors.confirmPassword && touched.confirmPassword && (
-                        <div className="text-red-500 text-sm mt-1">{errors.confirmPassword}</div>
-                      )}
                     </div>
+                  )}
 
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white rounded-full font-semibold"
-                    >
-                      SIGN UP
-                    </Button>
-                  </Form>
-                )}
-              </Formik>
+                  <Button
+                    type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        {isLogin ? "Signing In..." : "Creating Account..."}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center">
+                        {isLogin ? "Sign In" : "Create Account"}
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </div>
+                    )}
+                  </Button>
+                </Form>
+              )}
+            </Formik>
+
+            <div className="mt-6 text-center">
+              <button
+                onClick={toggleAuthMode}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors flex items-center justify-center w-full"
+              >
+                {isLogin
+                  ? "Don't have an account? Sign up"
+                  : "Already have an account? Sign in"}
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </button>
             </div>
-          )}
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
-  )
+  );
 }

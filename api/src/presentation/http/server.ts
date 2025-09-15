@@ -7,6 +7,7 @@ import logger from "../../shared/logger/logger";
 import { globalRateLimit } from "../middlewares/rate-limit.middleware";
 import { config } from "../../shared/config/config";
 import { AuthRoute } from "../routes/auth.route";
+import { CategoryRoute } from "../routes/category.route";
 
 export class Server {
   private _app: Application;
@@ -49,6 +50,7 @@ export class Server {
 
   private configureRoutes(): void {
     this._app.use("/api/v_1/auth", new AuthRoute().router);
+    this._app.use("/api/v_1/category", new CategoryRoute().router);
   }
 
   private configureErrorHandler(): void {
