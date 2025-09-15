@@ -7,6 +7,8 @@ import { IEmailExistenceUsecase } from "../../domain/interfaces/usecase/common-u
 import { EmailExistenceUsecase } from "../../application/common/email-existence.usecase";
 import { ICategoryUsecasee } from "../../domain/interfaces/usecase/category-usecase.interface";
 import { CategoryUsecase } from "../../application/category/category.usecase";
+import { ISubCategoryUsecasee } from "../../domain/interfaces/usecase/subcategory-usecase.interface";
+import { SubCategoryUsecase } from "../../application/category/sub-category.usecase";
 
 export class UsecaseRegistry {
     static registerUsecases() {
@@ -28,6 +30,10 @@ export class UsecaseRegistry {
 
         container.register<ICategoryUsecasee>("ICategoryUsecasee" , {
             useClass : CategoryUsecase
+        })
+
+        container.register<ISubCategoryUsecasee>("ISubCategoryUsecasee", {
+            useClass : SubCategoryUsecase
         })
     }
 }

@@ -28,7 +28,7 @@ export class LoginUsecase implements ILoginUsecase {
 
         const isPassMatch = await this._bcryptService.compare(password , client.data.password)
         if(!isPassMatch){
-            throw new CustomError(ERROR_MESSAGES.INVALID_PASSWORD, HTTP_STATUS.UNAUTHORIZED)
+            throw new CustomError(ERROR_MESSAGES.INVALID_PASSWORD, HTTP_STATUS.BAD_REQUEST)
         }
 
         return Mapper.userMapper(client.data)
