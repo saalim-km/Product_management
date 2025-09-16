@@ -187,16 +187,37 @@ export default function ProductManagement() {
     }
   };
 
-  const handleEditProduct = (updatedProduct: any) => {
-    console.log('upated product',updatedProduct);
-    setProducts(
-      products.map((product) =>
-        product._id === updatedProduct._id ? updatedProduct : product
-      )
-    );
-    setEditingProduct(null);
-    setSelectedProduct(null);
-    toast.success("Product updated successfully!");
+  const handleEditProduct = async (formData: FormData) => {
+    try {
+      // Extract product ID from formData or use editingProduct ID
+      const productId = editingProduct?._id;
+      if (!productId) {
+        toast.error("Product ID not found");
+        return;
+      }
+
+      // Send the formData to your API
+      const res = await productService.updateProduct(productId, formData);
+
+      // Update the products state with the updated product
+      setProducts(
+        products.map((product) =>
+          product._id === productId ? res.data : product
+        )
+      );
+
+      // Also update wishlist if needed
+      setWishlistItems(
+        wishlistItems.map((item) => (item._id === productId ? res.data : item))
+      );
+
+      setEditingProduct(null);
+      setSelectedProduct(null);
+      toast.success("Product updated successfully!");
+    } catch (error) {
+      handleError(error);
+      toast.error("Failed to update product");
+    }
   };
 
   const getBreadcrumbs = () => {
@@ -326,7 +347,7 @@ export default function ProductManagement() {
           <AddProductModal
             open={!!editingProduct}
             onOpenChange={() => setEditingProduct(null)}
-            onAdd={handleEditProduct}
+            onAdd={handleEditProduct as any} // This now expects FormData
             subCategories={subCategories}
             editingProduct={editingProduct}
           />
@@ -521,7 +542,7 @@ export default function ProductManagement() {
       <AddProductModal
         open={showAddProduct}
         onOpenChange={setShowAddProduct}
-        onAdd={handleAddProduct}
+        onAdd={handleAddProduct as any}
         subCategories={subCategories}
       />
 
@@ -529,7 +550,7 @@ export default function ProductManagement() {
         <AddProductModal
           open={!!editingProduct}
           onOpenChange={() => setEditingProduct(null)}
-          onAdd={handleEditProduct}
+          onAdd={handleEditProduct as any}
           subCategories={subCategories}
           editingProduct={editingProduct}
         />

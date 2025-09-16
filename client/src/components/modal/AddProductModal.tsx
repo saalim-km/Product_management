@@ -21,7 +21,7 @@ import { toast } from "sonner";
 interface AddProductModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (product: Omit<IProduct, "_id"> | IProduct) => void;
+  onAdd: (product: FormData | Omit<IProduct, "_id">) => void | Promise<void>; // Allow async
   subCategories: ISubCategory[];
   editingProduct?: IProduct | null;
 }
@@ -119,27 +119,50 @@ export function AddProductModal({
   // ...existing code...
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validation checks
     if (!name.trim()) {
       toast.error("Product name is required");
       return;
     }
+
     if (!selectedSubCategory) {
       toast.error("Please select a subcategory");
       return;
     }
+
     if (variants.length === 0 || variants.some((v) => !v.ram || v.price <= 0)) {
       toast.error("Please provide valid variants");
       return;
     }
-    // For new products, at least one image file is required
-    if (images.length === 0 && !editingProduct?.images) {
+
+    // For both new products AND editing products, at least one image is required
+    // Either existing images or new uploads
+    const hasExistingImages =
+      editingProduct?.images && editingProduct.images.length > 0;
+    const hasNewImages = images.length > 0;
+
+    if (!hasExistingImages && !hasNewImages) {
       toast.error("At least one image is required");
+      return;
+    }
+
+    // Additional validation for editing - ensure we have at least one image (existing or new)
+    if (editingProduct && !hasExistingImages && !hasNewImages) {
+      toast.error("Product must have at least one image");
       return;
     }
 
     const formData = new FormData();
     formData.append("name", name.trim());
-    if (description.trim()) formData.append("description", description.trim());
+
+    if (description.trim()) {
+      formData.append("description", description.trim());
+    } else {
+      // Even if description is empty, send it as empty string
+      formData.append("description", "");
+    }
+
     formData.append("subCategory", selectedSubCategory);
     formData.append(
       "variants",
@@ -147,19 +170,24 @@ export function AddProductModal({
     );
 
     // Append raw image files (binary)
-    images.forEach((image, index) => {
-      formData.append("images", image); // 'images' key for each file
+    images.forEach((image) => {
+      formData.append("images", image);
     });
 
     // If editing, send existing image URLs/IDs separately
-    if (editingProduct?.images?.length) {
-      formData.append("existingImages", JSON.stringify(editingProduct.images));
-      formData.append("_id", editingProduct._id as unknown as string);
+    if (editingProduct) {
+      if (editingProduct.images?.length) {
+        formData.append(
+          "existingImages",
+          JSON.stringify(editingProduct.images)
+        );
+      }
+      formData.append("_id", editingProduct._id as string);
     }
 
     try {
-      // Pass formData to your API handler
-      onAdd(formData as unknown as Omit<IProduct, "_id"> | IProduct);
+      // Pass formData directly to the handler
+      onAdd(formData);
       toast.success(
         editingProduct
           ? "Product updated successfully!"
