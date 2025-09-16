@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚀 MERN Stack Application
+# MERN - Product Management Application
 ### *Interview Assignment - Full-Stack Web Application*
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -68,32 +68,6 @@
 ![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white)
 
 </div>
-
----
-
-## 🏗️ **Project Architecture**
-
-\`\`\`
-📦 MERN Stack Application
-├── 🎨 frontend/
-│   ├── 📁 src/
-│   │   ├── 🧩 components/     # Reusable UI components
-│   │   ├── 📄 pages/          # Application pages
-│   │   ├── 🔌 api/            # API integration layer
-│   │   ├── 🛠️ services/       # Business logic services
-│   │   ├── 📝 types/          # TypeScript definitions
-│   │   └── 🔧 utils/          # Utility functions
-│   └── 🌐 public/             # Static assets
-├── ⚙️ backend/
-│   ├── 📁 src/
-│   │   ├── 🏛️ application/     # Application layer
-│   │   ├── 💼 usecases/        # Business use cases
-│   │   ├── 🔌 interfaceAdapters/ # Interface adapters
-│   │   ├── 🎭 presentation/    # Presentation layer
-│   │   └── 🤝 shared/          # Shared utilities
-│   └── 🧪 tests/              # Test suites
-└── 📚 docs/                   # Documentation
-\`\`\`
 
 ### 🎯 **Architectural Principles**
 
