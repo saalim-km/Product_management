@@ -107,7 +107,6 @@ export default function ProductManagement() {
       const product = products.find((p) => p._id === productId);
       if (product && !wishlistItems.find((item) => item._id === productId)) {
         setWishlistItems([...wishlistItems, product]);
-        toast.success("Added to wishlist!");
       }
 
       toast.success(res.message);
@@ -189,6 +188,7 @@ export default function ProductManagement() {
   };
 
   const handleEditProduct = (updatedProduct: any) => {
+    console.log('upated product',updatedProduct);
     setProducts(
       products.map((product) =>
         product._id === updatedProduct._id ? updatedProduct : product
