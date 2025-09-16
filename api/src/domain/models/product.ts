@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 export interface IVarient {
-  _id: Types.ObjectId;
+  _id?: Types.ObjectId;
   ram: string;
   price: number;
   qty: number;
@@ -12,5 +12,6 @@ export interface IProduct {
   name: string;
   description: string;
   subCategory: Types.ObjectId;
+  images : string[];
   variants: [IVarient];
 }

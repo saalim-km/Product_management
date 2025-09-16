@@ -13,6 +13,7 @@ const productSchema = new Schema<IProduct>({
   description: String,
   subCategory: { type: Schema.Types.ObjectId, ref: 'SubCategory', required: true },
   variants: [variantSchema],
+  images : [{type : String , required : true}]
 },{timestamps : true});
 
 export const Product = model<IProduct>('Product', productSchema);

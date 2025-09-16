@@ -3,7 +3,7 @@ import { IGenerateTokenUsecase, ILoginUsecase, IRegisterUsecase } from "../../do
 import { LoginUsecase } from "../../application/auth/login.usecase";
 import { RegisterUsecase } from "../../application/auth/signup.usecase";
 import { GenerateTokenUsecase } from "../../application/auth/generate-token.usecase";
-import { IEmailExistenceUsecase, IRefreshTokenUsecase } from "../../domain/interfaces/usecase/common-usecase.interfaces";
+import { IEmailExistenceUsecase, IGetPresignedUrlUsecase, IRefreshTokenUsecase } from "../../domain/interfaces/usecase/common-usecase.interfaces";
 import { EmailExistenceUsecase } from "../../application/common/email-existence.usecase";
 import { ICategoryUsecasee } from "../../domain/interfaces/usecase/category-usecase.interface";
 import { CategoryUsecase } from "../../application/category/category.usecase";
@@ -12,6 +12,7 @@ import { SubCategoryUsecase } from "../../application/category/sub-category.usec
 import { RefreshTokenUsecase } from "../../application/common/refresh-token.usecase";
 import { IProductUsecase } from "../../domain/interfaces/usecase/product-usecase.interface";
 import { ProductUsecase } from "../../application/product/product.usecase";
+import { GetPresignedUrlUsecase } from "../../application/common/get-presigned-url.usecase";
 
 export class UsecaseRegistry {
     static registerUsecases() {
@@ -45,6 +46,10 @@ export class UsecaseRegistry {
 
         container.register<IProductUsecase>("IProductUsecase" , {
             useClass : ProductUsecase
+        })
+
+        container.register<IGetPresignedUrlUsecase>("IGetPresignedUrlUsecase" , {
+            useClass : GetPresignedUrlUsecase
         })
     }
 }
