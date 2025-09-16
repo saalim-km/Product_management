@@ -17,6 +17,7 @@ import { handleError } from "../utils/error/error-handler.utils";
 import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
+import { productService } from "../services/product.service";
 
 export default function ProductManagement() {
   const [categories, setCategories] = useState<ICategory[]>([]);
@@ -102,8 +103,13 @@ export default function ProductManagement() {
     setSubCategories([...subCategories, newSubCategory]);
   };
 
-  const handleAddProduct = (product: Omit<IProduct, "_id">) => {
+  const handleAddProduct = async(product: Omit<IProduct, "_id">) => {
     console.log("new product", product);
+    try {
+      await productService.createProduct(product);
+    } catch (error) {
+      handleError(error)
+    }
     const newProduct = { ...product, _id: Date.now().toString() };
     setProducts([...products, newProduct]);
   };
@@ -167,7 +173,7 @@ export default function ProductManagement() {
     setWishlistItems(wishlistItems.filter((item) => item._id !== productId));
   };
 
-  const handleEditProduct = (updatedProduct: IProduct) => {
+  const handleEditProduct = (updatedProduct: any) => {
     setProducts(
       products.map((product) =>
         product._id === updatedProduct._id ? updatedProduct : product

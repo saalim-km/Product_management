@@ -8,7 +8,7 @@ export interface IVarient {
 }
 
 export interface IProduct {
-  _id: Types.ObjectId;
+  _id?: Types.ObjectId;
   name: string;
   description: string;
   subCategory: Types.ObjectId;

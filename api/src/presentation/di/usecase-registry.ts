@@ -10,6 +10,8 @@ import { CategoryUsecase } from "../../application/category/category.usecase";
 import { ISubCategoryUsecasee } from "../../domain/interfaces/usecase/subcategory-usecase.interface";
 import { SubCategoryUsecase } from "../../application/category/sub-category.usecase";
 import { RefreshTokenUsecase } from "../../application/common/refresh-token.usecase";
+import { IProductUsecase } from "../../domain/interfaces/usecase/product-usecase.interface";
+import { ProductUsecase } from "../../application/product/product.usecase";
 
 export class UsecaseRegistry {
     static registerUsecases() {
@@ -39,6 +41,10 @@ export class UsecaseRegistry {
 
         container.register<IRefreshTokenUsecase>("IRefreshTokenUsecase" , {
             useClass : RefreshTokenUsecase
+        })
+
+        container.register<IProductUsecase>("IProductUsecase" , {
+            useClass : ProductUsecase
         })
     }
 }

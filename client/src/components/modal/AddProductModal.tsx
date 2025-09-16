@@ -1,153 +1,182 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { Plus, Minus, Upload } from "lucide-react"
-import { useState, useEffect } from "react"
-import { IProduct, ISubCategory, IVariant } from "../../types/types"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog"
-import { Input } from "../ui/input"
-import { Label } from "../ui/label"
-import { Button } from "../ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select"
-import { Textarea } from "../ui/textarea"
-import { toast } from "sonner"
+import type React from "react";
+import { Plus, Minus, Upload } from "lucide-react";
+import { useState, useEffect } from "react";
+import type { IProduct, ISubCategory, IVariant } from "../../types/types";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Button } from "../ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Textarea } from "../ui/textarea";
+import { toast } from "sonner";
 
 interface AddProductModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onAdd: (product: Omit<IProduct, "_id"> | IProduct) => void
-  subCategories: ISubCategory[]
-  editingProduct?: IProduct | null
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onAdd: (product: Omit<IProduct, "_id"> | IProduct) => void;
+  subCategories: ISubCategory[];
+  editingProduct?: IProduct | null;
 }
 
-export function AddProductModal({ open, onOpenChange, onAdd, subCategories, editingProduct }: AddProductModalProps) {
-  const [name, setName] = useState("")
-  const [description, setDescription] = useState("")
-  const [selectedSubCategory, setSelectedSubCategory] = useState("")
-  const [variants, setVariants] = useState<Omit<IVariant, "_id">[]>([{ ram: "4 GB", price: 529.99, qty: 1 }])
-  const [images, setImages] = useState<File[]>([])
-  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+export function AddProductModal({
+  open,
+  onOpenChange,
+  onAdd,
+  subCategories,
+  editingProduct,
+}: AddProductModalProps) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [selectedSubCategory, setSelectedSubCategory] = useState("");
+  const [variants, setVariants] = useState<Omit<IVariant, "_id">[]>([
+    { ram: "4 GB", price: 529.99, qty: 1 },
+  ]);
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   useEffect(() => {
     if (editingProduct) {
-      setName(editingProduct.name)
-      setDescription(editingProduct.description || "")
-      setSelectedSubCategory(editingProduct.subCategory)
-      setVariants(editingProduct.variants.map((v) => ({ ram: v.ram, price: v.price, qty: v.qty })))
-      setImages([]) // Reset images for editing
-      setImagePreviews(editingProduct.images || []) // Use existing images for previews
+      setName(editingProduct.name);
+      setDescription(editingProduct.description || "");
+      setSelectedSubCategory(editingProduct.subCategory);
+      setVariants(
+        editingProduct.variants.map((v) => ({
+          ram: v.ram,
+          price: v.price,
+          qty: v.qty,
+        }))
+      );
+      setImages([]); // Reset images for editing
+      setImagePreviews(editingProduct.images || []); // Use existing images for previews
     } else {
-      setName("")
-      setDescription("")
-      setSelectedSubCategory("")
-      setVariants([{ ram: "4 GB", price: 529.99, qty: 1 }])
-      setImages([])
-      setImagePreviews([])
+      setName("");
+      setDescription("");
+      setSelectedSubCategory("");
+      setVariants([{ ram: "4 GB", price: 529.99, qty: 1 }]);
+      setImages([]);
+      setImagePreviews([]);
     }
-  }, [editingProduct, open])
+  }, [editingProduct, open]);
 
   const addVariant = () => {
-    setVariants([...variants, { ram: "", price: 0, qty: 1 }])
-  }
+    setVariants([...variants, { ram: "", price: 0, qty: 1 }]);
+  };
 
-  const updateVariant = (index: number, field: keyof IVariant, value: string | number) => {
-    const updated = [...variants]
-    updated[index] = { ...updated[index], [field]: value }
-    setVariants(updated)
-  }
+  const updateVariant = (
+    index: number,
+    field: keyof IVariant,
+    value: string | number
+  ) => {
+    const updated = [...variants];
+    updated[index] = { ...updated[index], [field]: value };
+    setVariants(updated);
+  };
 
   const removeVariant = (index: number) => {
     if (variants.length > 1) {
-      setVariants(variants.filter((_, i) => i !== index))
+      setVariants(variants.filter((_, i) => i !== index));
     }
-  }
+  };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
+    const files = Array.from(e.target.files || []);
     if (files.length + images.length > 3) {
-      toast.error("You can upload a maximum of 3 images.")
-      return
+      toast.error("You can upload a maximum of 3 images.");
+      return;
     }
 
-    const newImages = [...images, ...files]
-    setImages(newImages)
+    const newImages = [...images, ...files];
+    setImages(newImages);
 
     // Generate base64 previews for raw files
     const previews = await Promise.all(
       files.map(async (file) => {
         return new Promise<string>((resolve) => {
-          const reader = new FileReader()
-          reader.onload = () => resolve(reader.result as string)
-          reader.readAsDataURL(file)
-        })
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        });
       })
-    )
-    setImagePreviews([...imagePreviews, ...previews])
-  }
+    );
+    setImagePreviews([...imagePreviews, ...previews]);
+  };
 
   const removeImage = (index: number) => {
-    const newImages = images.filter((_, i) => i !== index)
-    const newPreviews = imagePreviews.filter((_, i) => i !== index)
-    setImages(newImages)
-    setImagePreviews(newPreviews)
-  }
+    const newImages = images.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    setImages(newImages);
+    setImagePreviews(newPreviews);
+  };
 
+  // ...existing code...
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!name.trim()) {
-      toast.error("Product name is required")
-      return
+      toast.error("Product name is required");
+      return;
     }
     if (!selectedSubCategory) {
-      toast.error("Please select a subcategory")
-      return
+      toast.error("Please select a subcategory");
+      return;
     }
     if (variants.length === 0 || variants.some((v) => !v.ram || v.price <= 0)) {
-      toast.error("Please provide valid variants")
-      return
+      toast.error("Please provide valid variants");
+      return;
     }
+    // For new products, at least one image file is required
     if (images.length === 0 && !editingProduct?.images) {
-      toast.error("At least one image is required")
-      return
+      toast.error("At least one image is required");
+      return;
     }
 
-    const productData: Omit<IProduct, "_id"> | IProduct = {
-      name: name.trim(),
-      description: description.trim() || undefined,
-      subCategory: selectedSubCategory,
-      variants: variants.filter((v) => v.ram && v.price > 0),
-      images: editingProduct?.images || imagePreviews, // Use base64 strings or existing images
-    }
+    const formData = new FormData();
+    formData.append("name", name.trim());
+    if (description.trim()) formData.append("description", description.trim());
+    formData.append("subCategory", selectedSubCategory);
+    formData.append(
+      "variants",
+      JSON.stringify(variants.filter((v) => v.ram && v.price > 0))
+    );
 
-    // Prepare FormData for image upload
-    const formData = new FormData()
-    formData.append("name", productData.name)
-    if (productData.description) formData.append("description", productData.description)
-    formData.append("subCategory", productData.subCategory)
-    formData.append("variants", JSON.stringify(productData.variants))
+    // Append raw image files (binary)
     images.forEach((image, index) => {
-      formData.append(`images[${index}]`, image)
-    })
+      formData.append("images", image); // 'images' key for each file
+    });
+
+    // If editing, send existing image URLs/IDs separately
+    if (editingProduct?.images?.length) {
+      formData.append("existingImages", JSON.stringify(editingProduct.images));
+      formData.append("_id", editingProduct._id);
+    }
 
     try {
-      if (editingProduct) {
-        onAdd({ ...productData, _id: editingProduct._id })
-      } else {
-        onAdd(productData)
-      }
-      toast.success(editingProduct ? "Product updated successfully!" : "Product added successfully!")
-      // Reset form
-      setName("")
-      setDescription("")
-      setSelectedSubCategory("")
-      setVariants([{ ram: "4 GB", price: 529.99, qty: 1 }])
-      setImages([])
-      setImagePreviews([])
-      onOpenChange(false)
+      // Pass formData to your API handler
+      onAdd(formData);
+      toast.success(
+        editingProduct
+          ? "Product updated successfully!"
+          : "Product added successfully!"
+      );
+      setName("");
+      setDescription("");
+      setSelectedSubCategory("");
+      setVariants([{ ram: "4 GB", price: 529.99, qty: 1 }]);
+      setImages([]);
+      setImagePreviews([]);
+      onOpenChange(false);
     } catch (error) {
-      toast.error("Failed to save product. Please try again.")
+      toast.error("Failed to save product. Please try again.");
     }
-  }
+  };
+  // ...existing code...
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -174,12 +203,17 @@ export function AddProductModal({ open, onOpenChange, onAdd, subCategories, edit
               <Label className="text-gray-500">Variants :</Label>
               <div className="space-y-3 mt-2">
                 {variants.map((variant, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 border rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center gap-3 p-3 border rounded-lg"
+                  >
                     <div className="flex-1">
                       <Label className="text-sm text-gray-500">RAM:</Label>
                       <Input
                         value={variant.ram}
-                        onChange={(e) => updateVariant(index, "ram", e.target.value)}
+                        onChange={(e) =>
+                          updateVariant(index, "ram", e.target.value)
+                        }
                         placeholder="4 GB"
                         className="mt-1"
                       />
@@ -187,11 +221,19 @@ export function AddProductModal({ open, onOpenChange, onAdd, subCategories, edit
                     <div className="flex-1">
                       <Label className="text-sm text-gray-500">Price:</Label>
                       <div className="relative mt-1">
-                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                          $
+                        </span>
                         <Input
                           type="number"
                           value={variant.price}
-                          onChange={(e) => updateVariant(index, "price", Number.parseFloat(e.target.value) || 0)}
+                          onChange={(e) =>
+                            updateVariant(
+                              index,
+                              "price",
+                              Number.parseFloat(e.target.value) || 0
+                            )
+                          }
                           className="pl-8"
                           step="0.01"
                         />
@@ -204,23 +246,38 @@ export function AddProductModal({ open, onOpenChange, onAdd, subCategories, edit
                           type="button"
                           size="sm"
                           variant="outline"
-                          onClick={() => updateVariant(index, "qty", Math.max(1, variant.qty - 1))}
+                          onClick={() =>
+                            updateVariant(
+                              index,
+                              "qty",
+                              Math.max(1, variant.qty - 1)
+                            )
+                          }
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
-                        <span className="mx-3 min-w-[2rem] text-center">{variant.qty}</span>
+                        <span className="mx-3 min-w-[2rem] text-center">
+                          {variant.qty}
+                        </span>
                         <Button
                           type="button"
                           size="sm"
                           variant="outline"
-                          onClick={() => updateVariant(index, "qty", variant.qty + 1)}
+                          onClick={() =>
+                            updateVariant(index, "qty", variant.qty + 1)
+                          }
                         >
                           <Plus className="h-3 w-3" />
                         </Button>
                       </div>
                     </div>
                     {variants.length > 1 && (
-                      <Button type="button" size="sm" variant="destructive" onClick={() => removeVariant(index)}>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => removeVariant(index)}
+                      >
                         Remove
                       </Button>
                     )}
@@ -239,7 +296,10 @@ export function AddProductModal({ open, onOpenChange, onAdd, subCategories, edit
 
             <div>
               <Label htmlFor="subcategory">Subcategory :</Label>
-              <Select value={selectedSubCategory} onValueChange={setSelectedSubCategory}>
+              <Select
+                value={selectedSubCategory}
+                onValueChange={setSelectedSubCategory}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a subcategory" />
                 </SelectTrigger>
@@ -268,7 +328,10 @@ export function AddProductModal({ open, onOpenChange, onAdd, subCategories, edit
               <Label>Upload Images (Max 3):</Label>
               <div className="flex gap-3 mt-2 flex-wrap">
                 {imagePreviews.map((preview, index) => (
-                  <div key={index} className="relative w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg">
+                  <div
+                    key={index}
+                    className="relative w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg"
+                  >
                     <img
                       src={preview}
                       alt={`Product ${index + 1}`}
@@ -306,15 +369,23 @@ export function AddProductModal({ open, onOpenChange, onAdd, subCategories, edit
           </div>
 
           <div className="flex gap-3 justify-center">
-            <Button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white px-8">
+            <Button
+              type="submit"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-8"
+            >
               {editingProduct ? "UPDATE" : "ADD"}
             </Button>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="px-8">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="px-8"
+            >
               DISCARD
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
