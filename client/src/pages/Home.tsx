@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { ShoppingCart, User, LogOut } from "lucide-react";
+import { ShoppingCart, User, LogOut, Rss } from "lucide-react";
 import { ICategory, IProduct, ISubCategory } from "../types/types";
 import { ProductDetail } from "./ProductDetail";
 import { ItemsSidebar } from "./ItemSidebar";
@@ -93,11 +93,7 @@ export default function ProductManagement() {
   const handleAddProduct = async (product: Omit<IProduct, "_id">) => {
     try {
       const res = await productService.createProduct(product);
-      if (products.length < 1) {
-        setProducts([res.data]);
-      } else {
-        setProducts([res.data, ...products]);
-      }
+      setProducts((prev) => [res.data,...prev])
       toast.success("Product added successfully!");
     } catch (error) {
       handleError(error);
@@ -107,12 +103,10 @@ export default function ProductManagement() {
   const handleAddToWishlist = async (productId: string) => {
     try {
       const res = await wishlistService.addToWishlist(productId);
-
       const product = products.find((p) => p._id === productId);
       if (product && !wishlistItems.find((item) => item._id === productId)) {
         setWishlistItems([...wishlistItems, product]);
       }
-
       toast.success(res.message);
     } catch (error) {
       handleError(error);
