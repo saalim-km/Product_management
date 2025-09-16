@@ -2,16 +2,6 @@
 
 A full-stack web application built with modern technologies, featuring clean architecture, scalable design, and efficient image handling with cloud storage.
 
-## 🏢 Company Information
-
-**SECLOB TECHNOLOGIES**  
-3rd Floor, Sahya Building  
-Govt. Cyberpark, Palazhi,  
-Kozhikode, Kerala 673016  
-
-📧 hr@seclob.in  
-🌐 www.seclobtechnologies.in  
-
 ## 🎨 Design Reference
 
 [Figma Design](https://www.figma.com/design/VQJvtPqJIM6rFcHa7qa4Ii/Demo?node-id=0-1&node-type=canvas&t=EuT1cf0QBbyqEjFw-0)
