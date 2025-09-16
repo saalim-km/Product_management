@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { objectIdSchema } from "./validators/validation";
+import {
+  limitQuerySchema,
+  objectIdSchema,
+  pageQuerySchema,
+} from "./validators/validation";
+import { Types } from "mongoose";
 
 const variantSchema = z.object({
   ram: z.string().min(1, "RAM is required"),
@@ -7,36 +12,16 @@ const variantSchema = z.object({
   qty: z.number().int().nonnegative("Quantity must be >= 0"),
 });
 
-// [Object: null prototype] {
-//   name: 'sample',
-//   description: 'fdafda',
-//   subCategory: '68c89661dd880c47cf9f1712',
-//   variants: '[{"ram":"4 GB","price":529.99,"qty":1}]'
-// }
-// [Object: null prototype] {
-//   images: [
-//     {
-//       fieldname: 'images',
-//       originalname: 'image-9.webp',
-//       encoding: '7bit',
-//       mimetype: 'image/webp',
-//       destination: 'uploads/',
-//       filename: '18eda897-5e10-44c8-9f10-421bb998de15-1757998286596.webp',
-//       path: 'uploads\\18eda897-5e10-44c8-9f10-421bb998de15-1757998286596.webp',
-//       size: 87482
-//     },
-//     {
-//       fieldname: 'images',
-//       originalname: 'haircut.webp',
-//       encoding: '7bit',
-//       mimetype: 'image/webp',
-//       destination: 'uploads/',
-//       filename: '0d2617fd-c24b-49b5-a377-9a17094366c7-1757998286597.webp',
-//       path: 'uploads\\0d2617fd-c24b-49b5-a377-9a17094366c7-1757998286597.webp',
-//       size: 35702
-//     }
-//   ]
-// }
+const optionalObjectIdSchema = z
+  .string()
+  .transform((val) => (val ? new Types.ObjectId(val) : undefined))
+  .refine(
+    (val) => val === undefined || Types.ObjectId.isValid(val.toString()),
+    {
+      message: "Invalid ObjectId",
+    }
+  )
+  .optional();
 
 export const createProductSchema = z.object({
   name: z.string(),
@@ -58,4 +43,12 @@ export const createProductSchema = z.object({
       .array(z.custom<Express.Multer.File>())
       .min(1, "At least one media file is required")
   ),
+});
+
+export const getAllProductsSchema = z.object({
+  search: z.string().optional().default(""),
+  page: pageQuerySchema,
+  limit: limitQuerySchema,
+  category: optionalObjectIdSchema,
+  subCategory: optionalObjectIdSchema,
 });

@@ -4,7 +4,13 @@ import { upload } from "../middlewares/multer.middleware";
 import { BaseRoute } from "./base.route";
 
 export class ProductRoute extends BaseRoute {
-    protected initializeRoutes(): void {
-        this.router.post('/' , verifyAuth,upload.fields([{ name: 'images', maxCount: 5 }]) , productController.createProduct.bind(productController))
-    }
+  protected initializeRoutes(): void {
+    this.router.post(
+      "/",
+      verifyAuth,
+      upload.fields([{ name: "images", maxCount: 5 }]),
+      productController.createProduct.bind(productController)
+    )
+    .get('/',verifyAuth,productController.getAllProducts.bind(productController))
+  }
 }

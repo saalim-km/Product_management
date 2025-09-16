@@ -18,6 +18,14 @@ import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { productService } from "../services/product.service";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "../components/ui/pagination";
 
 export default function ProductManagement() {
   const [categories, setCategories] = useState<ICategory[]>([]);
@@ -29,6 +37,7 @@ export default function ProductManagement() {
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>("");
   const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [fixedSearchQuery, setFixedSearchQuery] = useState("");
   const [editingProduct, setEditingProduct] = useState<IProduct | null>(null);
 
   const [showAddCategory, setShowAddCategory] = useState(false);
@@ -48,7 +57,7 @@ export default function ProductManagement() {
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
       .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+      .includes(fixedSearchQuery.toLowerCase());
 
     if (selectedSubCategory) {
       return product.subCategory === selectedSubCategory && matchesSearch;
@@ -75,7 +84,6 @@ export default function ProductManagement() {
   );
 
   const handleAddCategory = async (category: Omit<ICategory, "_id">) => {
-    console.log("new category", category);
     try {
       const res = await CategoryService.addCategory(category.name);
       setCategories([res.data, ...categories]);
@@ -88,7 +96,6 @@ export default function ProductManagement() {
   const handleAddSubCategory = async (
     subCategory: Omit<ISubCategory, "_id">
   ) => {
-    console.log("new sub category", subCategory);
     try {
       const res = await CategoryService.addSubCategory(
         subCategory.category,
@@ -99,30 +106,29 @@ export default function ProductManagement() {
     } catch (error) {
       handleError(error);
     }
-    const newSubCategory = { ...subCategory, _id: Date.now().toString() };
-    setSubCategories([...subCategories, newSubCategory]);
   };
 
   const handleAddProduct = async (product: Omit<IProduct, "_id">) => {
-    console.log("new product", product);
     try {
-      await productService.createProduct(product);
+      const res = await productService.createProduct(product);
+      setProducts([res.data, ...products]);
+      toast.success("Product added successfully!");
     } catch (error) {
       handleError(error);
     }
-    const newProduct = { ...product, _id: Date.now().toString() };
-    setProducts([...products, newProduct]);
   };
 
   const handleAddToWishlist = (productId: string) => {
     const product = products.find((p) => p._id === productId);
     if (product && !wishlistItems.find((item) => item._id === productId)) {
       setWishlistItems([...wishlistItems, product]);
+      toast.success("Added to wishlist!");
     }
   };
 
   const handleRemoveFromWishlist = (productId: string) => {
     setWishlistItems(wishlistItems.filter((item) => item._id !== productId));
+    toast.success("Removed from wishlist!");
   };
 
   const isInWishlist = (productId: string) => {
@@ -176,9 +182,15 @@ export default function ProductManagement() {
     }
   };
 
-  const handleDeleteProduct = (productId: string) => {
-    setProducts(products.filter((product) => product._id !== productId));
-    setWishlistItems(wishlistItems.filter((item) => item._id !== productId));
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      await productService.deleteProduct(productId);
+      setProducts(products.filter((product) => product._id !== productId));
+      setWishlistItems(wishlistItems.filter((item) => item._id !== productId));
+      toast.success("Product deleted successfully!");
+    } catch (error) {
+      handleError(error);
+    }
   };
 
   const handleEditProduct = (updatedProduct: any) => {
@@ -189,6 +201,7 @@ export default function ProductManagement() {
     );
     setEditingProduct(null);
     setSelectedProduct(null);
+    toast.success("Product updated successfully!");
   };
 
   const getBreadcrumbs = () => {
@@ -204,7 +217,6 @@ export default function ProductManagement() {
   };
 
   useEffect(() => {
-    // Fetch categories, subcategories, and products from API
     const fetchCategories = async () => {
       try {
         const res = await CategoryService.getAllCategories();
@@ -214,7 +226,7 @@ export default function ProductManagement() {
       }
     };
 
-    const fetchsubCategories = async () => {
+    const fetchSubCategories = async () => {
       try {
         const res = await CategoryService.getallsubcategories();
         setSubCategories(res.data);
@@ -223,9 +235,26 @@ export default function ProductManagement() {
       }
     };
 
-    fetchsubCategories();
+    const fetchProducts = async () => {
+      try {
+        const res = await productService.getAllProduct({
+          search: fixedSearchQuery,
+          page: currentPage,
+          limit: itemsPerPage,
+          category: selectedCategory,
+          subCategory: selectedSubCategory,
+        });
+        setProducts(res.data.data);
+      } catch (error) {
+        handleError(error);
+      }
+    };
+
+    fetchProducts();
+    fetchSubCategories();
     fetchCategories();
-  }, []);
+  }, [fixedSearchQuery, selectedCategory, selectedSubCategory, currentPage, itemsPerPage]);
+
   if (selectedProduct) {
     return (
       <>
@@ -297,7 +326,13 @@ export default function ProductManagement() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="bg-white text-gray-900"
               />
-              <Button className="bg-orange-500 hover:bg-orange-600">
+              <Button
+                className="bg-orange-500 hover:bg-orange-600"
+                onClick={() => {
+                  setFixedSearchQuery(searchQuery);
+                  setCurrentPage(1); // Reset to first page on search
+                }}
+              >
                 Search
               </Button>
             </div>
@@ -384,64 +419,79 @@ export default function ProductManagement() {
 
             {/* Products Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {paginatedProducts.map((product) => (
-                <ProductCard
-                  key={product._id}
-                  product={product}
-                  onView={setSelectedProduct}
-                  onEdit={() => setEditingProduct(product)}
-                  onDelete={() => handleDeleteProduct(product._id!)}
-                  onAddToWishlist={handleAddToWishlist}
-                  isInWishlist={isInWishlist(product._id!)}
-                />
-              ))}
+              {paginatedProducts.length > 0 ? (
+                paginatedProducts.map((product) => (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    onView={setSelectedProduct}
+                    onEdit={() => setEditingProduct(product)}
+                    onDelete={() => handleDeleteProduct(product._id!)}
+                    onAddToWishlist={handleAddToWishlist}
+                    isInWishlist={isInWishlist(product._id!)}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full text-center text-gray-500">
+                  No products found.
+                </div>
+              )}
             </div>
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                  {startIndex + 1} of {filteredProducts.length} items
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    (page) => (
-                      <Button
-                        key={page}
-                        size="sm"
-                        variant={currentPage === page ? "default" : "outline"}
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                    size={"icon"}
+                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                      size={"icon"}
                         onClick={() => setCurrentPage(page)}
-                        className={
-                          currentPage === page
-                            ? "bg-orange-500 hover:bg-orange-600"
-                            : ""
-                        }
+                        isActive={currentPage === page}
+                        className={currentPage === page ? "bg-orange-500 text-white hover:bg-orange-600" : ""}
                       >
                         {page}
-                      </Button>
-                    )
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">Show</span>
-                  <select
-                    className="border border-gray-300 rounded px-2 py-1 text-sm"
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                      setItemsPerPage(Number(e.target.value));
-                      setCurrentPage(1);
-                    }}
-                  >
-                    <option value={3}>3 rows</option>
-                    <option value={6}>6 rows</option>
-                    <option value={10}>10 rows</option>
-                    <option value={20}>20 rows</option>
-                  </select>
-                </div>
-              </div>
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  <PaginationItem>
+                    <PaginationNext
+                    size={"icon"}
+                      onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             )}
+            <div className="flex items-center justify-between mt-4">
+              <div className="text-sm text-gray-600">
+                Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredProducts.length)} of {filteredProducts.length} items
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Show</span>
+                <select
+                  className="border border-gray-300 rounded px-2 py-1 text-sm"
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option value={3}>3 rows</option>
+                  <option value={6}>6 rows</option>
+                  <option value={10}>10 rows</option>
+                  <option value={20}>20 rows</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
       </div>

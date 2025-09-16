@@ -19,11 +19,12 @@ export function ProductCard({ product, onView, onEdit, onDelete, onAddToWishlist
   const [selectedVariant, setSelectedVariant] = useState(0)
   const variant = product.variants[selectedVariant]
 
+  const image = product.images && product.images.length > 0 ? product.images[0] : "/placeholder.png"
   return (
     <Card className="group hover:shadow-lg transition-shadow">
       <CardContent className="p-4">
         <div className="relative mb-4">
-          <img src="/modern-laptop.png" alt={product.name} className="w-full h-48 object-cover rounded-lg" />
+          <img src={image} alt={product.name} className="w-full h-48 object-cover rounded-lg" />
           <Button
             size="icon"
             variant="ghost"

@@ -4,7 +4,7 @@ import type { IProductRepository } from "../../domain/interfaces/repository/prod
 import { IProduct } from "../../domain/models/product";
 import { CustomError } from "../../shared/utils/helper/custom-error";
 import { HTTP_STATUS } from "../../shared/constants/constant";
-import { Types } from "mongoose";
+import { FilterQuery, Types } from "mongoose";
 import { ICreateProductDTO } from "../../domain/types/product.type";
 import { generateS3FileKey } from "../../shared/utils/helper/sw-filekey-generator";
 import { config } from "../../shared/config/config";
@@ -13,6 +13,7 @@ import logger from "../../shared/logger/logger";
 import { cleanUpLocalFiles } from "../../shared/utils/helper/clean-local-file.helper";
 import { unknown } from "zod";
 import { GetPresignedUrlUsecase } from "../common/get-presigned-url.usecase";
+import { ProductSearchParams } from "../../domain/interfaces/usecase/types/product.types";
 
 @injectable()
 export class ProductUsecase implements IProductUsecase {
@@ -95,22 +96,27 @@ export class ProductUsecase implements IProductUsecase {
     return await this._productRepo.update(id, data);
   }
 
-  async getAllProducts(input: {
-    search: string;
-    page: number;
-    limit: number;
-  }): Promise<{ count: number; data: IProduct[] }> {
-    const { limit, page, search } = input;
+  async getAllProducts(input: ProductSearchParams): Promise<{ count: number; data: IProduct[]}> {
+    const { search, page, limit , category , subCategory} = input;
     const skip = (page - 1) * limit;
-    const filter = search ? { name: { $regex: search, $options: "i" } } : {};
-    const [count, data] = await Promise.all([
-      this._productRepo.count(filter),
-      this._productRepo.findAll(filter, skip, limit, { name: 1 }),
-    ]);
+    const filter : FilterQuery<IProduct> = {}
+    if(search){
+      filter.name = search.trim()
+    }
+    if(subCategory){
+      filter['subCategory'] = subCategory
+    }
+    if(category){
+      filter['category'] = category;
+    }
 
-    return {
-      count: count,
-      data: data,
-    };
+    console.log(filter);
+    let {data,count} =  await this._productRepo.fetchProducts({filter, skip, limit});
+    data = await Promise.all(data.map(async (product)=> {
+      product.images = await Promise.all(product.images.map((key) => this._presignedUrl.getPresignedUrl(key)))
+      return product
+    }))
+
+    return {data,count};
   }
 }

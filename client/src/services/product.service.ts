@@ -1,4 +1,3 @@
-import { get } from "http";
 import { axiosInstance } from "../api/axios-instance";
 import { IProduct } from "../types/types";
 import { ApiResponse } from "./auth.service";
@@ -22,6 +21,10 @@ export const productService = {
         "Content-Type": "multipart/form-data",
       },
     });
+    return response.data;
+  },
+  getAllProduct : async (params : {search ?: string , page : number , limit : number, category ?: string , subCategory ?: string}) : Promise<ApiResponse<{count : number , data : IProduct[]}>> => {
+    const response = await axiosInstance.get("/product", {params});
     return response.data;
   }
 };

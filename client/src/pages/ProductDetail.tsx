@@ -1,10 +1,19 @@
 "use client"
 
 import { Heart, Minus, Plus, ArrowLeft } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { IProduct } from "../types/types"
 import { Button } from "../components/ui/button"
 import { Card, CardContent } from "../components/ui/card"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "../components/ui/carousel"
+import { Dialog, DialogContent } from "../components/ui/dialog"
 
 interface Breadcrumb {
   label: string
@@ -30,8 +39,39 @@ export function ProductDetail({
 }: ProductDetailProps) {
   const [selectedVariant, setSelectedVariant] = useState(0)
   const [quantity, setQuantity] = useState(1)
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>()
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [lightboxApi, setLightboxApi] = useState<CarouselApi>()
 
   const variant = product.variants[selectedVariant]
+  const images = product.images ?? []
+
+  useEffect(() => {
+    if (!carouselApi) return
+
+    setCurrentIndex(carouselApi.selectedScrollSnap())
+
+    const handleSelect = () => {
+      setCurrentIndex(carouselApi.selectedScrollSnap())
+    }
+
+    carouselApi.on("select", handleSelect)
+
+    return () => {
+      carouselApi.off("select", handleSelect)
+    }
+  }, [carouselApi])
+
+  useEffect(() => {
+    if (lightboxOpen && lightboxApi) {
+      lightboxApi.scrollTo(currentIndex)
+    }
+  }, [lightboxOpen, lightboxApi, currentIndex])
+
+  const handleImageClick = () => {
+    setLightboxOpen(true)
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -55,32 +95,61 @@ export function ProductDetail({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Product Images */}
         <div className="space-y-4">
-          <Card>
-            <CardContent className="p-4">
-              <img
-                src="/laptop-computer-detailed-view.jpg"
-                alt={product.name}
-                className="w-full h-96 object-cover rounded-lg"
-              />
-            </CardContent>
-          </Card>
+          <Carousel setApi={setCarouselApi} className="w-full">
+            <CarouselContent>
+              {images.length > 0 ? (
+                images.map((img, index) => (
+                  <CarouselItem key={index}>
+                    <Card>
+                      <CardContent className="p-4">
+                        <img
+                          src={img}
+                          alt={`${product.name} ${index + 1}`}
+                          className="w-full h-96 object-cover rounded-lg cursor-zoom-in transition-transform duration-300 hover:scale-105"
+                          onClick={handleImageClick}
+                        />
+                      </CardContent>
+                    </Card>
+                  </CarouselItem>
+                ))
+              ) : (
+                <CarouselItem>
+                  <Card>
+                    <CardContent className="p-4">
+                      <img
+                        src="/placeholder.png"
+                        alt={product.name}
+                        className="w-full h-96 object-cover rounded-lg cursor-zoom-in transition-transform duration-300 hover:scale-105"
+                        onClick={handleImageClick}
+                      />
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              )}
+            </CarouselContent>
+            {images.length > 1 && (
+              <>
+                <CarouselPrevious />
+                <CarouselNext />
+              </>
+            )}
+          </Carousel>
 
-          <div className="flex gap-4">
-            <Card className="w-24 h-20">
-              <CardContent className="p-2">
+          {images.length > 1 && (
+            <div className="flex gap-4 overflow-x-auto pb-2">
+              {images.map((img, index) => (
                 <img
-                  src="/modern-laptop-workspace.png"
-                  alt="Thumbnail 1"
-                  className="w-full h-full object-cover rounded"
+                  key={index}
+                  src={img}
+                  alt={`Thumbnail ${index + 1}`}
+                  className={`w-24 h-24 object-cover rounded-md cursor-pointer transition-opacity duration-300 ${
+                    currentIndex === index ? "opacity-100 border-2 border-orange-500" : "opacity-70"
+                  }`}
+                  onClick={() => carouselApi?.scrollTo(index)}
                 />
-              </CardContent>
-            </Card>
-            <Card className="w-24 h-20">
-              <CardContent className="p-2">
-                <img src="/laptop-side-view.jpg" alt="Thumbnail 2" className="w-full h-full object-cover rounded" />
-              </CardContent>
-            </Card>
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Product Info */}
@@ -153,6 +222,41 @@ export function ProductDetail({
           </div>
         </div>
       </div>
+
+      {/* Lightbox Modal */}
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 bg-transparent border-none shadow-none">
+          <Carousel setApi={setLightboxApi} className="w-full h-full">
+            <CarouselContent className="h-[80vh]">
+              {images.length > 0 ? (
+                images.map((img, index) => (
+                  <CarouselItem key={index} className="flex items-center justify-center">
+                    <img
+                      src={img}
+                      alt={`${product.name} ${index + 1}`}
+                      className="max-w-full max-h-[80vh] object-contain"
+                    />
+                  </CarouselItem>
+                ))
+              ) : (
+                <CarouselItem className="flex items-center justify-center">
+                  <img
+                    src="/placeholder.png"
+                    alt={product.name}
+                    className="max-w-full max-h-[80vh] object-contain"
+                  />
+                </CarouselItem>
+              )}
+            </CarouselContent>
+            {images.length > 1 && (
+              <>
+                <CarouselPrevious className="left-4" />
+                <CarouselNext className="right-4" />
+              </>
+            )}
+          </Carousel>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
