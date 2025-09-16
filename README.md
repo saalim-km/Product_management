@@ -182,7 +182,7 @@ cd frontend && npm start
 
 ## 🎯 **Core Features**
 
-### 📤 **Advanced Image Upload System**
+### 📤 **Image Upload System**
 
 \`\`\`typescript
 // Presigned URL generation with Redis caching
