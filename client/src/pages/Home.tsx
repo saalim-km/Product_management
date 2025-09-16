@@ -18,17 +18,11 @@ import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { productService } from "../services/product.service";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "../components/ui/pagination";
+import Pagination from "../components/ui/pagination";
 
 export default function ProductManagement() {
   const [categories, setCategories] = useState<ICategory[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [subCategories, setSubCategories] = useState<ISubCategory[]>([]);
   const [products, setProducts] = useState<IProduct[]>([]);
   const [wishlistItems, setWishlistItems] = useState<IProduct[]>([]);
@@ -46,42 +40,16 @@ export default function ProductManagement() {
   const [showItemsSidebar, setShowItemsSidebar] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(3);
+  const [itemsPerPage, setItemsPerPage] = useState(2);
 
   const user = useSelector((state: RootState) => {
     if (state.user) return state.user.user;
     return null;
   });
 
-  // Filter products based on selected category/subcategory and search
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(fixedSearchQuery.toLowerCase());
-
-    if (selectedSubCategory) {
-      return product.subCategory === selectedSubCategory && matchesSearch;
-    }
-
-    if (selectedCategory) {
-      const categorySubCategories = subCategories
-        .filter((sub) => sub.category === selectedCategory)
-        .map((sub) => sub._id);
-      return (
-        categorySubCategories.includes(product.subCategory) && matchesSearch
-      );
-    }
-
-    return matchesSearch;
-  });
-
   // Pagination
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const totalPages = Math.ceil(totalProducts / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedProducts = filteredProducts.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
 
   const handleAddCategory = async (category: Omit<ICategory, "_id">) => {
     try {
@@ -184,7 +152,7 @@ export default function ProductManagement() {
 
   const handleDeleteProduct = async (productId: string) => {
     try {
-      await productService.deleteProduct(productId);
+      // await productService.deleteProduct(productId);
       setProducts(products.filter((product) => product._id !== productId));
       setWishlistItems(wishlistItems.filter((item) => item._id !== productId));
       toast.success("Product deleted successfully!");
@@ -244,6 +212,7 @@ export default function ProductManagement() {
           category: selectedCategory,
           subCategory: selectedSubCategory,
         });
+        setTotalProducts(res.data.count);
         setProducts(res.data.data);
       } catch (error) {
         handleError(error);
@@ -253,7 +222,13 @@ export default function ProductManagement() {
     fetchProducts();
     fetchSubCategories();
     fetchCategories();
-  }, [fixedSearchQuery, selectedCategory, selectedSubCategory, currentPage, itemsPerPage]);
+  }, [
+    fixedSearchQuery,
+    selectedCategory,
+    selectedSubCategory,
+    currentPage,
+    itemsPerPage,
+  ]);
 
   if (selectedProduct) {
     return (
@@ -419,8 +394,8 @@ export default function ProductManagement() {
 
             {/* Products Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {paginatedProducts.length > 0 ? (
-                paginatedProducts.map((product) => (
+              {totalProducts > 0 ? (
+                products.map((product) => (
                   <ProductCard
                     key={product._id}
                     product={product}
@@ -439,41 +414,17 @@ export default function ProductManagement() {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                    size={"icon"}
-                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                    />
-                  </PaginationItem>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                      size={"icon"}
-                        onClick={() => setCurrentPage(page)}
-                        isActive={currentPage === page}
-                        className={currentPage === page ? "bg-orange-500 text-white hover:bg-orange-600" : ""}
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-                  <PaginationItem>
-                    <PaginationNext
-                    size={"icon"}
-                      onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+
             <div className="flex items-center justify-between mt-4">
               <div className="text-sm text-gray-600">
-                Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredProducts.length)} of {filteredProducts.length} items
+                Showing {startIndex + 1} to{" "}
+                {Math.min(startIndex + itemsPerPage, totalProducts)}{" "}
+                of {totalProducts} items
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">Show</span>
