@@ -16,3 +16,5 @@ export interface ICreateProductDTO {
   variants: IProductVariant[];
   images: Express.Multer.File[];
 }
+
+export interface IUpdateProductDTO extends ICreateProductDTO {}

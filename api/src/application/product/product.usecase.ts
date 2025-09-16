@@ -5,7 +5,7 @@ import { IProduct } from "../../domain/models/product";
 import { CustomError } from "../../shared/utils/helper/custom-error";
 import { HTTP_STATUS } from "../../shared/constants/constant";
 import { FilterQuery, Types } from "mongoose";
-import { ICreateProductDTO } from "../../domain/types/product.type";
+import { ICreateProductDTO, IUpdateProductDTO } from "../../domain/types/product.type";
 import { generateS3FileKey } from "../../shared/utils/helper/sw-filekey-generator";
 import { config } from "../../shared/config/config";
 import type { IAwsS3Service } from "../../domain/interfaces/service/aws-service.interface";
@@ -84,17 +84,6 @@ export class ProductUsecase implements IProductUsecase {
     } finally {
       await cleanUpLocalFiles(images)
     }
-  }
-
-  async updateProduct(
-    id: Types.ObjectId,
-    data: Partial<IProduct>
-  ): Promise<any> {
-    const isProductExist = await this._productRepo.findById(id);
-    if (!isProductExist) {
-      throw new CustomError("Product not found", HTTP_STATUS.NOT_FOUND);
-    }
-    return await this._productRepo.update(id, data);
   }
 
   async getAllProducts(input: ProductSearchParams): Promise<{ count: number; data: IProduct[]}> {

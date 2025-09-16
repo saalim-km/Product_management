@@ -17,8 +17,6 @@ export class ProductController {
   ) {}
 
   async createProduct(req: Request, res: Response) {
-    console.log("req body : ", req.body);
-    console.log("req files : ", req.files);
     const payload = createProductSchema.parse({
       ...req.body,
       images: (
@@ -33,6 +31,22 @@ export class ProductController {
     });
     ResponseHandler.success(res, SUCCESS_MESSAGES.CREATED, product);
   }
+
+  // async updateProduct(req: Request, res: Response) {
+  //   const payload = createProductSchema.parse({
+  //     ...req.body,
+  //     images: (
+  //       req.files as { [fieldname: string]: Express.Multer.File[] } | undefined
+  //     )?.images,
+  //   });
+
+  //   const userId = objectIdSchema.parse((req as CustomRequest).user._id);
+  //   const product = await this._productUsecase.updateProduct({
+  //     ...payload,
+  //     user: userId,
+  //   });
+  //   ResponseHandler.success(res, SUCCESS_MESSAGES.CREATED, product);
+  // }
 
   async getAllProducts(req: Request, res: Response) {
     const userId = objectIdSchema.parse((req as CustomRequest).user._id);
