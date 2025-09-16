@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { ShoppingCart, User } from "lucide-react";
+import { ShoppingCart, User, LogOut } from "lucide-react";
 import { ICategory, IProduct, ISubCategory } from "../types/types";
 import { ProductDetail } from "./ProductDetail";
 import { ItemsSidebar } from "./ItemSidebar";
@@ -15,10 +15,17 @@ import { AddSubCategoryModal } from "../components/modal/AddSubcategoryModal";
 import { CategoryService } from "../services/category.service";
 import { handleError } from "../utils/error/error-handler.utils";
 import { toast } from "sonner";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store/store";
 import { productService } from "../services/product.service";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
 import Pagination from "../components/ui/pagination";
+import { userLogout } from "../store/slices/user.slice";
 
 export default function ProductManagement() {
   const [categories, setCategories] = useState<ICategory[]>([]);
@@ -42,6 +49,7 @@ export default function ProductManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(2);
 
+  const dispatch = useDispatch();
   const user = useSelector((state: RootState) => {
     if (state.user) return state.user.user;
     return null;
@@ -50,6 +58,11 @@ export default function ProductManagement() {
   // Pagination
   const totalPages = Math.ceil(totalProducts / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
+
+  const handleLogout = () => {
+    dispatch(userLogout());
+    toast.success("Logged out successfully!");
+  };
 
   const handleAddCategory = async (category: Omit<ICategory, "_id">) => {
     try {
@@ -240,13 +253,23 @@ export default function ProductManagement() {
               <div className="text-xl font-semibold">Product Management</div>
 
               <div className="flex items-center gap-4">
-                <Button
-                  variant="ghost"
-                  className="text-white hover:text-gray-200"
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  {user?.name}
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="text-white hover:text-gray-200"
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      {user ? user.name : "Guest"}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button
                   variant="ghost"
                   className="text-white hover:text-gray-200"
@@ -313,13 +336,23 @@ export default function ProductManagement() {
             </div>
 
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                className="text-white hover:text-gray-900"
-              >
-                <User className="h-4 w-4 mr-2" />
-                {user ? user.name : "Guest"}
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:text-gray-900"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    {user ? user.name : "Guest"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button
                 variant="ghost"
                 className="text-white hover:text-gray-900"

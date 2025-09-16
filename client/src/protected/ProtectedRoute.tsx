@@ -27,7 +27,7 @@ export const AuthRoute = ({ element }: NoAuthRouteProps) => {
   });
 
   if (!user) {
-    return <Navigate to={"/login"} />;
+    return <Navigate to={"/auth"} />;
   }
 
   return element;
