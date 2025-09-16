@@ -39,7 +39,11 @@ export function ItemsSidebar({ isOpen, onClose, items, onRemoveItem }: ItemsSide
             <Card key={item._id} className="relative">
               <CardContent className="p-3">
                 <div className="flex gap-3">
-                  <img src="/modern-laptop-workspace.png" alt={item.name} className="w-16 h-12 object-cover rounded" />
+                  <img
+                    src={item.images && item.images.length > 0 ? item.images[0] : "/placeholder.png"}
+                    alt={item.name}
+                    className="w-16 h-12 object-cover rounded"
+                  />
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-sm text-slate-800 truncate">{item.name}</h3>
                     <div className="text-sm font-semibold text-slate-900">${item.variants[0]?.price}</div>

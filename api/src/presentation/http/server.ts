@@ -9,6 +9,7 @@ import { config } from "../../shared/config/config";
 import { AuthRoute } from "../routes/auth.route";
 import { CategoryRoute } from "../routes/category.route";
 import { ProductRoute } from "../routes/product.route";
+import { WishlistRoute } from "../routes/wishlist.route";
 
 export class Server {
   private _app: Application;
@@ -53,6 +54,7 @@ export class Server {
     this._app.use("/api/v_1/auth", new AuthRoute().router);
     this._app.use("/api/v_1/category", new CategoryRoute().router);
     this._app.use("/api/v_1/product", new ProductRoute().router);
+    this._app.use("/api/v_1/wishlist", new WishlistRoute().router);
   }
 
   private configureErrorHandler(): void {

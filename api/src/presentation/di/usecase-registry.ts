@@ -13,6 +13,8 @@ import { RefreshTokenUsecase } from "../../application/common/refresh-token.usec
 import { IProductUsecase } from "../../domain/interfaces/usecase/product-usecase.interface";
 import { ProductUsecase } from "../../application/product/product.usecase";
 import { GetPresignedUrlUsecase } from "../../application/common/get-presigned-url.usecase";
+import { IWishlistUsecase } from "../../domain/interfaces/usecase/wishlist-usecase.interface";
+import { WishlistUsecase } from "../../application/wishlist/wishlist.usecase";
 
 export class UsecaseRegistry {
     static registerUsecases() {
@@ -50,6 +52,10 @@ export class UsecaseRegistry {
 
         container.register<IGetPresignedUrlUsecase>("IGetPresignedUrlUsecase" , {
             useClass : GetPresignedUrlUsecase
+        })
+
+        container.register<IWishlistUsecase>('IWishlistUsecase', {
+            useClass : WishlistUsecase
         })
     }
 }

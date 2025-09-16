@@ -26,6 +26,7 @@ import {
 } from "../components/ui/dropdown-menu";
 import Pagination from "../components/ui/pagination";
 import { userLogout } from "../store/slices/user.slice";
+import { wishlistService } from "../services/wishlist.service";
 
 export default function ProductManagement() {
   const [categories, setCategories] = useState<ICategory[]>([]);
@@ -99,11 +100,19 @@ export default function ProductManagement() {
     }
   };
 
-  const handleAddToWishlist = (productId: string) => {
-    const product = products.find((p) => p._id === productId);
-    if (product && !wishlistItems.find((item) => item._id === productId)) {
-      setWishlistItems([...wishlistItems, product]);
-      toast.success("Added to wishlist!");
+  const handleAddToWishlist = async (productId: string) => {
+    try {
+      const res = await wishlistService.addToWishlist(productId);
+
+      const product = products.find((p) => p._id === productId);
+      if (product && !wishlistItems.find((item) => item._id === productId)) {
+        setWishlistItems([...wishlistItems, product]);
+        toast.success("Added to wishlist!");
+      }
+
+      toast.success(res.message);
+    } catch (error) {
+      handleError(error);
     }
   };
 
@@ -232,6 +241,16 @@ export default function ProductManagement() {
       }
     };
 
+    const fetchWishlist = async () => {
+      try {
+        const res = await wishlistService.getWishlist();
+        setWishlistItems(res.data);
+      } catch (error) {
+        handleError(error);
+      }
+    }
+    
+    fetchWishlist()
     fetchProducts();
     fetchSubCategories();
     fetchCategories();
@@ -359,7 +378,7 @@ export default function ProductManagement() {
                 onClick={() => setShowItemsSidebar(true)}
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
-                Cart
+                WishList
               </Button>
             </div>
           </div>

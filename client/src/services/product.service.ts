@@ -32,5 +32,3 @@ export const productService = {
     return response.data;
   }
 };
-
-// params: { search: string; page: number; limit: number }
