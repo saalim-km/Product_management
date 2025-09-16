@@ -11,7 +11,7 @@ import { Types } from "mongoose";
 export class CategoryUsecase implements ICategoryUsecasee {
   constructor(
     @inject("ICategoryRepository") private _categoryRepo: ICategoryRepository
-  ) {}
+  ){}
 
   async addCategory(
     categoryName: string,
@@ -19,6 +19,7 @@ export class CategoryUsecase implements ICategoryUsecasee {
   ): Promise<ICategory> {
     const iscatExists = await this._categoryRepo.findOne({
       name: categoryName.trim(),
+      user : user
     });
     if (iscatExists) {
       throw new CustomError(
