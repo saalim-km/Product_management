@@ -116,9 +116,14 @@ export default function ProductManagement() {
     }
   };
 
-  const handleRemoveFromWishlist = (productId: string) => {
-    setWishlistItems(wishlistItems.filter((item) => item._id !== productId));
-    toast.success("Removed from wishlist!");
+  const handleRemoveFromWishlist = async (productId: string) => {
+    try {
+      const res = await wishlistService.removeFromWishlist(productId);
+      setWishlistItems(wishlistItems.filter((item) => item._id !== productId));
+      toast.success(res.message);
+    } catch (error) {
+      handleError(error);
+    }
   };
 
   const isInWishlist = (productId: string) => {
@@ -248,9 +253,9 @@ export default function ProductManagement() {
       } catch (error) {
         handleError(error);
       }
-    }
-    
-    fetchWishlist()
+    };
+
+    fetchWishlist();
     fetchProducts();
     fetchSubCategories();
     fetchCategories();
