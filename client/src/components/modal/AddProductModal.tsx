@@ -34,8 +34,8 @@ export function AddProductModal({ open, onOpenChange, onAdd, subCategories, edit
       setDescription(editingProduct.description || "")
       setSelectedSubCategory(editingProduct.subCategory)
       setVariants(editingProduct.variants.map((v) => ({ ram: v.ram, price: v.price, qty: v.qty })))
-      setImages([]) // Reset images for editing, assuming images are handled separately
-      setImagePreviews(editingProduct.images || []) // Assuming IProduct has an images array for previews
+      setImages([]) // Reset images for editing
+      setImagePreviews(editingProduct.images || []) // Use existing images for previews
     } else {
       setName("")
       setDescription("")
@@ -62,7 +62,7 @@ export function AddProductModal({ open, onOpenChange, onAdd, subCategories, edit
     }
   }
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
     if (files.length + images.length > 3) {
       toast.error("You can upload a maximum of 3 images.")
@@ -72,8 +72,16 @@ export function AddProductModal({ open, onOpenChange, onAdd, subCategories, edit
     const newImages = [...images, ...files]
     setImages(newImages)
 
-    // Generate previews
-    const previews = files.map((file) => URL.createObjectURL(file))
+    // Generate base64 previews for raw files
+    const previews = await Promise.all(
+      files.map(async (file) => {
+        return new Promise<string>((resolve) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.readAsDataURL(file)
+        })
+      })
+    )
     setImagePreviews([...imagePreviews, ...previews])
   }
 
@@ -108,7 +116,7 @@ export function AddProductModal({ open, onOpenChange, onAdd, subCategories, edit
       description: description.trim() || undefined,
       subCategory: selectedSubCategory,
       variants: variants.filter((v) => v.ram && v.price > 0),
-      images: editingProduct?.images || imagePreviews, // Use existing images if editing
+      images: editingProduct?.images || imagePreviews, // Use base64 strings or existing images
     }
 
     // Prepare FormData for image upload

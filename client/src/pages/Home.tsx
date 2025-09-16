@@ -15,81 +15,8 @@ import { AddSubCategoryModal } from "../components/modal/AddSubcategoryModal";
 import { CategoryService } from "../services/category.service";
 import { handleError } from "../utils/error/error-handler.utils";
 import { toast } from "sonner";
-
-// Dummy data
-const dummyCategories: ICategory[] = [
-  { _id: "1", name: "Laptop" },
-  { _id: "2", name: "Tablet" },
-  { _id: "3", name: "Headphones" },
-];
-
-const dummySubCategories: ISubCategory[] = [
-  { _id: "1", name: "HP", category: "1" },
-  { _id: "2", name: "Dell", category: "1" },
-  { _id: "3", name: "Apple", category: "2" },
-];
-
-const dummyProducts: IProduct[] = [
-  {
-    _id: "1",
-    name: "HP AMD Ryzen 3",
-    description:
-      "The Ryzen 7 is a more high-end processor that compares to the Intel Core i7 series.",
-    subCategory: "1",
-    variants: [
-      { ram: "4 GB", price: 529.99, qty: 34 },
-      { ram: "8 GB", price: 629.99, qty: 20 },
-      { ram: "16 GB", price: 729.99, qty: 15 },
-    ],
-  },
-  {
-    _id: "2",
-    name: "HP A MD Ryzen 3",
-    description: "High-performance laptop for professional use.",
-    subCategory: "1",
-    variants: [
-      { ram: "4 GB", price: 529.99, qty: 25 },
-      { ram: "8 GB", price: 629.99, qty: 18 },
-    ],
-  },
-  {
-    _id: "3",
-    name: "HP AMD Ryzen 3",
-    description: "Reliable laptop for everyday computing.",
-    subCategory: "1",
-    variants: [
-      { ram: "4 GB", price: 529.99, qty: 40 },
-      { ram: "8 GB", price: 629.99, qty: 30 },
-    ],
-  },
-  {
-    _id: "4",
-    name: "HP AMD Ryzen 3",
-    description: "Budget-friendly option with great performance.",
-    subCategory: "1",
-    variants: [{ ram: "4 GB", price: 529.99, qty: 22 }],
-  },
-  {
-    _id: "5",
-    name: "HP AMD Ryzen 3",
-    description: "Premium laptop with advanced features.",
-    subCategory: "1",
-    variants: [
-      { ram: "8 GB", price: 629.99, qty: 12 },
-      { ram: "16 GB", price: 729.99, qty: 8 },
-    ],
-  },
-  {
-    _id: "6",
-    name: "HP AMD Ryzen 3",
-    description: "Versatile laptop for work and entertainment.",
-    subCategory: "1",
-    variants: [
-      { ram: "4 GB", price: 529.99, qty: 35 },
-      { ram: "8 GB", price: 629.99, qty: 25 },
-    ],
-  },
-];
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
 
 export default function ProductManagement() {
   const [categories, setCategories] = useState<ICategory[]>([]);
@@ -110,6 +37,11 @@ export default function ProductManagement() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(3);
+
+  const user = useSelector((state: RootState) => {
+    if (state.user) return state.user.user;
+    return null;
+  });
 
   // Filter products based on selected category/subcategory and search
   const filteredProducts = products.filter((product) => {
@@ -295,7 +227,7 @@ export default function ProductManagement() {
                   className="text-white hover:text-gray-200"
                 >
                   <User className="h-4 w-4 mr-2" />
-                  Sign in
+                  {user?.name}
                 </Button>
                 <Button
                   variant="ghost"
@@ -303,7 +235,6 @@ export default function ProductManagement() {
                   onClick={() => setShowItemsSidebar(true)}
                 >
                   <ShoppingCart className="h-4 w-4 mr-2" />
-                  Cart
                 </Button>
               </div>
             </div>
@@ -360,14 +291,14 @@ export default function ProductManagement() {
             <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
-                className="text-white hover:text-gray-200"
+                className="text-white hover:text-gray-900"
               >
                 <User className="h-4 w-4 mr-2" />
-                Sign in
+                {user ? user.name : "Guest"}
               </Button>
               <Button
                 variant="ghost"
-                className="text-white hover:text-gray-200"
+                className="text-white hover:text-gray-900"
                 onClick={() => setShowItemsSidebar(true)}
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
