@@ -47,7 +47,7 @@ export default function ProductManagement() {
   const [showItemsSidebar, setShowItemsSidebar] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(2);
+  const [itemsPerPage, setItemsPerPage] = useState(3);
 
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => {
@@ -165,10 +165,10 @@ export default function ProductManagement() {
 
   const handleDeleteProduct = async (productId: string) => {
     try {
-      // await productService.deleteProduct(productId);
+      const res = await productService.deleteProduct(productId);
       setProducts(products.filter((product) => product._id !== productId));
       setWishlistItems(wishlistItems.filter((item) => item._id !== productId));
-      toast.success("Product deleted successfully!");
+      toast.success(res.message);
     } catch (error) {
       handleError(error);
     }
@@ -456,8 +456,8 @@ export default function ProductManagement() {
             <div className="flex items-center justify-between mt-4">
               <div className="text-sm text-gray-600">
                 Showing {startIndex + 1} to{" "}
-                {Math.min(startIndex + itemsPerPage, totalProducts)}{" "}
-                of {totalProducts} items
+                {Math.min(startIndex + itemsPerPage, totalProducts)} of{" "}
+                {totalProducts} items
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">Show</span>

@@ -13,7 +13,10 @@ export class CategoryUsecase implements ICategoryUsecasee {
     @inject("ICategoryRepository") private _categoryRepo: ICategoryRepository
   ) {}
 
-  async addCategory(categoryName: string): Promise<ICategory> {
+  async addCategory(
+    categoryName: string,
+    user: Types.ObjectId
+  ): Promise<ICategory> {
     const iscatExists = await this._categoryRepo.findOne({
       name: categoryName.trim(),
     });
@@ -24,7 +27,7 @@ export class CategoryUsecase implements ICategoryUsecasee {
       );
     }
 
-    return await this._categoryRepo.create({ name: categoryName });
+    return await this._categoryRepo.create({ name: categoryName, user: user });
   }
 
   async updateCategory(input: UpdateCategoryInput): Promise<void> {
@@ -44,7 +47,7 @@ export class CategoryUsecase implements ICategoryUsecasee {
     await this._categoryRepo.deleteCategory(categoryId);
   }
 
-  async getAllCategories(): Promise<ICategory[]> {
-    return await this._categoryRepo.findAll({},0,100,-1);
+  async getAllCategories(user: Types.ObjectId): Promise<ICategory[]> {
+    return await this._categoryRepo.findAll({ user: user }, 0, 100, -1);
   }
 }

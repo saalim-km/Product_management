@@ -24,7 +24,7 @@ export class ProductRepository
     const {category,subCategory,name} = input.filter;
 
     // Base filter (search support)
-    let filter: any = {};
+    let filter: any = {user : input.filter.user};
     if (name) {
       filter.name = { $regex: name, $options: "i" };
     }

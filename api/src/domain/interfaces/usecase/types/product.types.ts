@@ -6,4 +6,5 @@ export interface ProductSearchParams {
     limit: number;
     category?: Types.ObjectId | undefined;
     subCategory?: Types.ObjectId | undefined;
+    user : Types.ObjectId;
 }

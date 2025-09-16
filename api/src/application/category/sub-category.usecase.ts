@@ -20,7 +20,7 @@ export class SubCategoryUsecase implements ISubCategoryUsecasee {
         await this._subCategoryRepo.delete(subCatId);
     }
 
-    async getAllSubCategories(): Promise<ISubCategory[]> {
-        return this._subCategoryRepo.findAll({},0,100,-1);
+    async getAllSubCategories(user : Types.ObjectId): Promise<ISubCategory[]> {
+        return this._subCategoryRepo.findAll({user : user},0,100,-1);
     }
 }

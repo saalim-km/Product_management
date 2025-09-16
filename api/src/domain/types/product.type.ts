@@ -10,6 +10,7 @@ export interface IProductVariant {
 // Main product object
 export interface ICreateProductDTO {
   name: string;
+  user : Types.ObjectId;
   description: string;
   subCategory: Types.ObjectId; // store ObjectId as string in DTO
   variants: IProductVariant[];

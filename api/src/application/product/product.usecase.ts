@@ -24,7 +24,7 @@ export class ProductUsecase implements IProductUsecase {
   ) {}
 
   async createProduct(data: ICreateProductDTO): Promise<IProduct> {
-    const { description, images, name, subCategory, variants } = data;
+    const { description, images, name, subCategory, variants , user} = data;
 
     let filekeys: string[] = [];
     const uploadedkeys: string[] = [];
@@ -56,6 +56,7 @@ export class ProductUsecase implements IProductUsecase {
           price: number;
           qty: number;
         }],
+        user : user,
         images: filekeys,
       });
 
@@ -99,7 +100,7 @@ export class ProductUsecase implements IProductUsecase {
   async getAllProducts(input: ProductSearchParams): Promise<{ count: number; data: IProduct[]}> {
     const { search, page, limit , category , subCategory} = input;
     const skip = (page - 1) * limit;
-    const filter : FilterQuery<IProduct> = {}
+    const filter : FilterQuery<IProduct> = {user : input.user};
     if(search){
       filter.name = search.trim()
     }
@@ -118,5 +119,13 @@ export class ProductUsecase implements IProductUsecase {
     }))
 
     return {data,count};
+  }
+
+  async deleteProduct(categoryId: Types.ObjectId): Promise<void> {
+    const isCategoryExist = await this._productRepo.findById(categoryId);
+    if (!isCategoryExist) {
+      throw new CustomError("Product not found", HTTP_STATUS.NOT_FOUND);
+    }
+    await this._productRepo.delete(categoryId);
   }
 }

@@ -7,11 +7,11 @@ export class CategoryRoute extends BaseRoute {
         this.router
         .post('/', verifyAuth,categoryController.addCategory.bind(categoryController))
         .delete('/:id', verifyAuth,categoryController.deleteCategory.bind(categoryController))
-        .get('/', categoryController.getAllCategories.bind(categoryController))
+        .get('/', verifyAuth,categoryController.getAllCategories.bind(categoryController))
 
         this.router
         .post('/sub',verifyAuth,categoryController.addSubCategory.bind(categoryController))
         .delete('/sub/:id',verifyAuth,categoryController.deleteSubCategory.bind(categoryController))
-        .get('/sub',categoryController.getallSubCategories.bind(categoryController));
+        .get('/sub',verifyAuth,categoryController.getallSubCategories.bind(categoryController));
     }
 }
