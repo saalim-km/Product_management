@@ -12,5 +12,6 @@ export class ProductRoute extends BaseRoute {
       productController.createProduct.bind(productController)
     )
     .get('/',verifyAuth,productController.getAllProducts.bind(productController))
+    .delete('/:id',verifyAuth,productController.deleteProduct.bind(productController))
   }
 }

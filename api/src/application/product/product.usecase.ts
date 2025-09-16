@@ -5,7 +5,7 @@ import { IProduct } from "../../domain/models/product";
 import { CustomError } from "../../shared/utils/helper/custom-error";
 import { HTTP_STATUS } from "../../shared/constants/constant";
 import { FilterQuery, Types } from "mongoose";
-import { ICreateProductDTO } from "../../domain/types/product.type";
+import { ICreateProductDTO, IUpdateProductDTO } from "../../domain/types/product.type";
 import { generateS3FileKey } from "../../shared/utils/helper/sw-filekey-generator";
 import { config } from "../../shared/config/config";
 import type { IAwsS3Service } from "../../domain/interfaces/service/aws-service.interface";
@@ -24,7 +24,7 @@ export class ProductUsecase implements IProductUsecase {
   ) {}
 
   async createProduct(data: ICreateProductDTO): Promise<IProduct> {
-    const { description, images, name, subCategory, variants } = data;
+    const { description, images, name, subCategory, variants , user} = data;
 
     let filekeys: string[] = [];
     const uploadedkeys: string[] = [];
@@ -56,6 +56,7 @@ export class ProductUsecase implements IProductUsecase {
           price: number;
           qty: number;
         }],
+        user : user,
         images: filekeys,
       });
 
@@ -85,21 +86,10 @@ export class ProductUsecase implements IProductUsecase {
     }
   }
 
-  async updateProduct(
-    id: Types.ObjectId,
-    data: Partial<IProduct>
-  ): Promise<any> {
-    const isProductExist = await this._productRepo.findById(id);
-    if (!isProductExist) {
-      throw new CustomError("Product not found", HTTP_STATUS.NOT_FOUND);
-    }
-    return await this._productRepo.update(id, data);
-  }
-
   async getAllProducts(input: ProductSearchParams): Promise<{ count: number; data: IProduct[]}> {
     const { search, page, limit , category , subCategory} = input;
     const skip = (page - 1) * limit;
-    const filter : FilterQuery<IProduct> = {}
+    const filter : FilterQuery<IProduct> = {user : input.user};
     if(search){
       filter.name = search.trim()
     }
@@ -118,5 +108,13 @@ export class ProductUsecase implements IProductUsecase {
     }))
 
     return {data,count};
+  }
+
+  async deleteProduct(categoryId: Types.ObjectId): Promise<void> {
+    const isCategoryExist = await this._productRepo.findById(categoryId);
+    if (!isCategoryExist) {
+      throw new CustomError("Product not found", HTTP_STATUS.NOT_FOUND);
+    }
+    await this._productRepo.delete(categoryId);
   }
 }

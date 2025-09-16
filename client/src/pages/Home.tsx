@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { ShoppingCart, User } from "lucide-react";
+import { ShoppingCart, User, LogOut } from "lucide-react";
 import { ICategory, IProduct, ISubCategory } from "../types/types";
 import { ProductDetail } from "./ProductDetail";
 import { ItemsSidebar } from "./ItemSidebar";
@@ -15,10 +15,18 @@ import { AddSubCategoryModal } from "../components/modal/AddSubcategoryModal";
 import { CategoryService } from "../services/category.service";
 import { handleError } from "../utils/error/error-handler.utils";
 import { toast } from "sonner";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store/store";
 import { productService } from "../services/product.service";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
 import Pagination from "../components/ui/pagination";
+import { userLogout } from "../store/slices/user.slice";
+import { wishlistService } from "../services/wishlist.service";
 
 export default function ProductManagement() {
   const [categories, setCategories] = useState<ICategory[]>([]);
@@ -40,8 +48,9 @@ export default function ProductManagement() {
   const [showItemsSidebar, setShowItemsSidebar] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(2);
+  const [itemsPerPage, setItemsPerPage] = useState(3);
 
+  const dispatch = useDispatch();
   const user = useSelector((state: RootState) => {
     if (state.user) return state.user.user;
     return null;
@@ -50,6 +59,11 @@ export default function ProductManagement() {
   // Pagination
   const totalPages = Math.ceil(totalProducts / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
+
+  const handleLogout = () => {
+    dispatch(userLogout());
+    toast.success("Logged out successfully!");
+  };
 
   const handleAddCategory = async (category: Omit<ICategory, "_id">) => {
     try {
@@ -86,17 +100,29 @@ export default function ProductManagement() {
     }
   };
 
-  const handleAddToWishlist = (productId: string) => {
-    const product = products.find((p) => p._id === productId);
-    if (product && !wishlistItems.find((item) => item._id === productId)) {
-      setWishlistItems([...wishlistItems, product]);
-      toast.success("Added to wishlist!");
+  const handleAddToWishlist = async (productId: string) => {
+    try {
+      const res = await wishlistService.addToWishlist(productId);
+
+      const product = products.find((p) => p._id === productId);
+      if (product && !wishlistItems.find((item) => item._id === productId)) {
+        setWishlistItems([...wishlistItems, product]);
+      }
+
+      toast.success(res.message);
+    } catch (error) {
+      handleError(error);
     }
   };
 
-  const handleRemoveFromWishlist = (productId: string) => {
-    setWishlistItems(wishlistItems.filter((item) => item._id !== productId));
-    toast.success("Removed from wishlist!");
+  const handleRemoveFromWishlist = async (productId: string) => {
+    try {
+      const res = await wishlistService.removeFromWishlist(productId);
+      setWishlistItems(wishlistItems.filter((item) => item._id !== productId));
+      toast.success(res.message);
+    } catch (error) {
+      handleError(error);
+    }
   };
 
   const isInWishlist = (productId: string) => {
@@ -152,24 +178,46 @@ export default function ProductManagement() {
 
   const handleDeleteProduct = async (productId: string) => {
     try {
-      // await productService.deleteProduct(productId);
+      const res = await productService.deleteProduct(productId);
       setProducts(products.filter((product) => product._id !== productId));
       setWishlistItems(wishlistItems.filter((item) => item._id !== productId));
-      toast.success("Product deleted successfully!");
+      toast.success(res.message);
     } catch (error) {
       handleError(error);
     }
   };
 
-  const handleEditProduct = (updatedProduct: any) => {
-    setProducts(
-      products.map((product) =>
-        product._id === updatedProduct._id ? updatedProduct : product
-      )
-    );
-    setEditingProduct(null);
-    setSelectedProduct(null);
-    toast.success("Product updated successfully!");
+  const handleEditProduct = async (formData: FormData) => {
+    try {
+      // Extract product ID from formData or use editingProduct ID
+      const productId = editingProduct?._id;
+      if (!productId) {
+        toast.error("Product ID not found");
+        return;
+      }
+
+      // Send the formData to your API
+      const res = await productService.updateProduct(productId, formData);
+
+      // Update the products state with the updated product
+      setProducts(
+        products.map((product) =>
+          product._id === productId ? res.data : product
+        )
+      );
+
+      // Also update wishlist if needed
+      setWishlistItems(
+        wishlistItems.map((item) => (item._id === productId ? res.data : item))
+      );
+
+      setEditingProduct(null);
+      setSelectedProduct(null);
+      toast.success("Product updated successfully!");
+    } catch (error) {
+      handleError(error);
+      toast.error("Failed to update product");
+    }
   };
 
   const getBreadcrumbs = () => {
@@ -219,6 +267,16 @@ export default function ProductManagement() {
       }
     };
 
+    const fetchWishlist = async () => {
+      try {
+        const res = await wishlistService.getWishlist();
+        setWishlistItems(res.data);
+      } catch (error) {
+        handleError(error);
+      }
+    };
+
+    fetchWishlist();
     fetchProducts();
     fetchSubCategories();
     fetchCategories();
@@ -240,13 +298,23 @@ export default function ProductManagement() {
               <div className="text-xl font-semibold">Product Management</div>
 
               <div className="flex items-center gap-4">
-                <Button
-                  variant="ghost"
-                  className="text-white hover:text-gray-200"
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  {user?.name}
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="text-white hover:text-gray-200"
+                    >
+                      <User className="h-4 w-4 mr-2" />
+                      {user ? user.name : "Guest"}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button
                   variant="ghost"
                   className="text-white hover:text-gray-200"
@@ -279,7 +347,7 @@ export default function ProductManagement() {
           <AddProductModal
             open={!!editingProduct}
             onOpenChange={() => setEditingProduct(null)}
-            onAdd={handleEditProduct}
+            onAdd={handleEditProduct as any} // This now expects FormData
             subCategories={subCategories}
             editingProduct={editingProduct}
           />
@@ -313,20 +381,30 @@ export default function ProductManagement() {
             </div>
 
             <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                className="text-white hover:text-gray-900"
-              >
-                <User className="h-4 w-4 mr-2" />
-                {user ? user.name : "Guest"}
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="text-white hover:text-gray-900"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    {user ? user.name : "Guest"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button
                 variant="ghost"
                 className="text-white hover:text-gray-900"
                 onClick={() => setShowItemsSidebar(true)}
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
-                Cart
+                WishList
               </Button>
             </div>
           </div>
@@ -423,8 +501,8 @@ export default function ProductManagement() {
             <div className="flex items-center justify-between mt-4">
               <div className="text-sm text-gray-600">
                 Showing {startIndex + 1} to{" "}
-                {Math.min(startIndex + itemsPerPage, totalProducts)}{" "}
-                of {totalProducts} items
+                {Math.min(startIndex + itemsPerPage, totalProducts)} of{" "}
+                {totalProducts} items
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600">Show</span>
@@ -464,7 +542,7 @@ export default function ProductManagement() {
       <AddProductModal
         open={showAddProduct}
         onOpenChange={setShowAddProduct}
-        onAdd={handleAddProduct}
+        onAdd={handleAddProduct as any}
         subCategories={subCategories}
       />
 
@@ -472,7 +550,7 @@ export default function ProductManagement() {
         <AddProductModal
           open={!!editingProduct}
           onOpenChange={() => setEditingProduct(null)}
-          onAdd={handleEditProduct}
+          onAdd={handleEditProduct as any}
           subCategories={subCategories}
           editingProduct={editingProduct}
         />

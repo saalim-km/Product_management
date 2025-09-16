@@ -11,7 +11,7 @@ function App() {
       <Toaster richColors={true} position="top-right"/>
       <Routes>
         <Route path="/auth" element={<NoAuthRoute element={<AuthPage/>}/>} />
-        <Route path="/home" element={<AuthRoute element={<ProductManagement/>}/>} />
+        <Route path="/" element={<AuthRoute element={<ProductManagement/>}/>} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>

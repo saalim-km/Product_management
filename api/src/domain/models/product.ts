@@ -10,6 +10,7 @@ export interface IVarient {
 export interface IProduct {
   _id?: Types.ObjectId;
   name: string;
+  user : Types.ObjectId;
   description: string;
   subCategory: Types.ObjectId;
   images : string[];

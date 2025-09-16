@@ -26,7 +26,9 @@ export const productService = {
   getAllProduct : async (params : {search ?: string , page : number , limit : number, category ?: string , subCategory ?: string}) : Promise<ApiResponse<{count : number , data : IProduct[]}>> => {
     const response = await axiosInstance.get("/product", {params});
     return response.data;
+  },
+  deleteProduct : async (id : string) : Promise<ApiResponse<null>> => {
+    const response = await axiosInstance.delete(`/product/${id}`);
+    return response.data;
   }
 };
-
-// params: { search: string; page: number; limit: number }
