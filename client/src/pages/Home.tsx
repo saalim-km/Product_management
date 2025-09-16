@@ -103,12 +103,12 @@ export default function ProductManagement() {
     setSubCategories([...subCategories, newSubCategory]);
   };
 
-  const handleAddProduct = async(product: Omit<IProduct, "_id">) => {
+  const handleAddProduct = async (product: Omit<IProduct, "_id">) => {
     console.log("new product", product);
     try {
       await productService.createProduct(product);
     } catch (error) {
-      handleError(error)
+      handleError(error);
     }
     const newProduct = { ...product, _id: Date.now().toString() };
     setProducts([...products, newProduct]);
@@ -157,14 +157,22 @@ export default function ProductManagement() {
     }
   };
 
-  const handleDeleteSubCategory = (subCategoryId: string) => {
-    setSubCategories(subCategories.filter((sub) => sub._id !== subCategoryId));
-    setProducts(
-      products.filter((product) => product.subCategory !== subCategoryId)
-    );
+  const handleDeleteSubCategory = async (subCategoryId: string) => {
+    try {
+      const res = await CategoryService.deleteSubCategory(subCategoryId);
+      toast.success(res.message);
+      setSubCategories(
+        subCategories.filter((sub) => sub._id !== subCategoryId)
+      );
+      setProducts(
+        products.filter((product) => product.subCategory !== subCategoryId)
+      );
 
-    if (selectedSubCategory === subCategoryId) {
-      setSelectedSubCategory("");
+      if (selectedSubCategory === subCategoryId) {
+        setSelectedSubCategory("");
+      }
+    } catch (error) {
+      handleError(error);
     }
   };
 

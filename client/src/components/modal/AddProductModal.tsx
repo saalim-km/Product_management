@@ -154,12 +154,12 @@ export function AddProductModal({
     // If editing, send existing image URLs/IDs separately
     if (editingProduct?.images?.length) {
       formData.append("existingImages", JSON.stringify(editingProduct.images));
-      formData.append("_id", editingProduct._id);
+      formData.append("_id", editingProduct._id as unknown as string);
     }
 
     try {
       // Pass formData to your API handler
-      onAdd(formData);
+      onAdd(formData as unknown as Omit<IProduct, "_id"> | IProduct);
       toast.success(
         editingProduct
           ? "Product updated successfully!"
