@@ -78,7 +78,7 @@ export default function ProductManagement() {
   const handleAddSubCategory = async (
     subCategory: Omit<ISubCategory, "_id">
   ) => {
-    try {
+    try { 
       const res = await CategoryService.addSubCategory(
         subCategory.category,
         subCategory.name
