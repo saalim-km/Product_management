@@ -284,6 +284,7 @@ export default function ProductManagement() {
     selectedSubCategory,
     currentPage,
     itemsPerPage,
+    setProducts
   ]);
 
   if (selectedProduct) {
