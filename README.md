@@ -173,10 +173,10 @@ cd frontend && npm start
 |--------|----------|-------------|---------------|
 | `POST` | `/api/v_1/auth/register` | 👤 User registration | ❌ |
 | `POST` | `/api/v_1/auth/login` | 🔐 User login | ❌ |
-| `POST` | `/api/images/upload` | 📤 Get presigned URL for upload | ✅ |
-| `GET` | `/api/images` | 📋 Get all images | ✅ |
-| `GET` | `/api/images/:id` | 🖼️ Get specific image | ✅ |
-| `DELETE` | `/api/images/:id` | 🗑️ Delete image | ✅ |
+| `POST` | `/api/v_1/product` | 📤 Get presigned URL for upload | ✅ |
+| `GET` | `/api/v_1/product` | 📋 Get all products | ✅ |
+| `PUT` | `/api/v_1/product/:id` | 📋 Update Product | ✅ |
+| `DELETE` | `/api/v_1/:id` | 🗑️ Delete product | ✅ |
 
 ---
 
