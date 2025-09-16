@@ -10,10 +10,19 @@ import {
   registerSchema,
   userLoginSchema,
 } from "../../shared/utils/validation/auth.validation";
-import { setAuthCookies } from "../../shared/utils/helper/cookie-helper";
+import {
+  setAuthCookies,
+  updateCookieWithAccessToken,
+} from "../../shared/utils/helper/cookie-helper";
 import { ResponseHandler } from "../../shared/utils/helper/response-handler";
-import { SUCCESS_MESSAGES } from "../../shared/constants/constant";
+import {
+  ERROR_MESSAGES,
+  HTTP_STATUS,
+  SUCCESS_MESSAGES,
+} from "../../shared/constants/constant";
 import { IAuthController } from "../../domain/interfaces/controller/auth-controller.interface";
+import type { IRefreshTokenUsecase } from "../../domain/interfaces/usecase/common-usecase.interfaces";
+import { CustomRequest } from "../middlewares/auth.middleware";
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -21,14 +30,15 @@ export class AuthController implements IAuthController {
     @inject("ILoginUsecase") private _loginUsecase: ILoginUsecase,
     @inject("IRegisterUsecase") private _registerUsecase: IRegisterUsecase,
     @inject("IGenerateTokenUsecase")
-    private _generateToken: IGenerateTokenUsecase
+    private _generateToken: IGenerateTokenUsecase,
+    @inject("IRefreshTokenUsecase") private _refreshTokenUsecase: IRefreshTokenUsecase
   ) {}
 
   async login(req: Request, res: Response): Promise<void> {
     const payload = userLoginSchema.parse(req.body);
-    console.log('parsed data');
+    console.log("parsed data");
     console.log(payload);
-    console.log('logging the login usecase');
+    console.log("logging the login usecase");
     console.log(this._loginUsecase);
     const user = await this._loginUsecase.login(payload);
 
@@ -55,5 +65,21 @@ export class AuthController implements IAuthController {
     const payload = registerSchema.parse(req.body);
     await this._registerUsecase.register(payload);
     ResponseHandler.success(res, SUCCESS_MESSAGES.CREATED, null, 201);
+  }
+
+  async refreshToken(req: Request, res: Response): Promise<void> {
+    const user = (req as CustomRequest).user;
+
+    const accessToken = await this._refreshTokenUsecase.execute({
+      _id: user._id,
+      email: user.email,
+      refreshToken: user.refresh_token,
+    });
+
+    updateCookieWithAccessToken(res, accessToken, "user_AT");
+
+    ResponseHandler.success(res, SUCCESS_MESSAGES.REFRESH_TOKEN_SUCCESS, {
+      accessToken,
+    });
   }
 }

@@ -3,10 +3,16 @@ import { IGenerateTokenUsecase, ILoginUsecase, IRegisterUsecase } from "../../do
 import { LoginUsecase } from "../../application/auth/login.usecase";
 import { RegisterUsecase } from "../../application/auth/signup.usecase";
 import { GenerateTokenUsecase } from "../../application/auth/generate-token.usecase";
-import { IEmailExistenceUsecase } from "../../domain/interfaces/usecase/common-usecase.interfaces";
+import { IEmailExistenceUsecase, IGetPresignedUrlUsecase, IRefreshTokenUsecase } from "../../domain/interfaces/usecase/common-usecase.interfaces";
 import { EmailExistenceUsecase } from "../../application/common/email-existence.usecase";
 import { ICategoryUsecasee } from "../../domain/interfaces/usecase/category-usecase.interface";
 import { CategoryUsecase } from "../../application/category/category.usecase";
+import { ISubCategoryUsecasee } from "../../domain/interfaces/usecase/subcategory-usecase.interface";
+import { SubCategoryUsecase } from "../../application/category/sub-category.usecase";
+import { RefreshTokenUsecase } from "../../application/common/refresh-token.usecase";
+import { IProductUsecase } from "../../domain/interfaces/usecase/product-usecase.interface";
+import { ProductUsecase } from "../../application/product/product.usecase";
+import { GetPresignedUrlUsecase } from "../../application/common/get-presigned-url.usecase";
 
 export class UsecaseRegistry {
     static registerUsecases() {
@@ -28,6 +34,22 @@ export class UsecaseRegistry {
 
         container.register<ICategoryUsecasee>("ICategoryUsecasee" , {
             useClass : CategoryUsecase
+        })
+
+        container.register<ISubCategoryUsecasee>("ISubCategoryUsecasee", {
+            useClass : SubCategoryUsecase
+        })
+
+        container.register<IRefreshTokenUsecase>("IRefreshTokenUsecase" , {
+            useClass : RefreshTokenUsecase
+        })
+
+        container.register<IProductUsecase>("IProductUsecase" , {
+            useClass : ProductUsecase
+        })
+
+        container.register<IGetPresignedUrlUsecase>("IGetPresignedUrlUsecase" , {
+            useClass : GetPresignedUrlUsecase
         })
     }
 }

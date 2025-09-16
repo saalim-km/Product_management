@@ -1,9 +1,10 @@
 import { AxiosResponse } from "axios";
 import { axiosInstance } from "../api/axios-instance";
 
-export interface ApiResponse {
+export interface ApiResponse<T = any> {
   success : boolean,
   message : string,
+  data : T
 }
 
 export const AuthService = {
