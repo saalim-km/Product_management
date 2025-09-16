@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { ShoppingCart, User, LogOut, Rss } from "lucide-react";
+import { ShoppingCart, User, LogOut } from "lucide-react";
 import { ICategory, IProduct, ISubCategory } from "../types/types";
 import { ProductDetail } from "./ProductDetail";
 import { ItemsSidebar } from "./ItemSidebar";
