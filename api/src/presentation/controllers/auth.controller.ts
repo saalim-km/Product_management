@@ -77,9 +77,6 @@ export class AuthController implements IAuthController {
     });
 
     updateCookieWithAccessToken(res, accessToken, "user_AT");
-
-    ResponseHandler.success(res, SUCCESS_MESSAGES.REFRESH_TOKEN_SUCCESS, {
-      accessToken,
-    });
+    ResponseHandler.success(res, SUCCESS_MESSAGES.REFRESH_TOKEN_SUCCESS);
   }
 }
