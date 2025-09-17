@@ -13,6 +13,9 @@ export const handleError = (error: unknown) => {
         return;
       }
 
+      if(data && data.message === 'Unauthorized access.') {
+        localStorage.removeItem('userSession')
+      }
       // Generic backend error message
       if (data && data.message) {
         toast.error(data.message);
