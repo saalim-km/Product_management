@@ -94,6 +94,16 @@ export default function ProductManagement() {
     try {
       await productService.createProduct(product);
       toast.success("Product added successfully!");
+      const res = await productService.getAllProduct({
+        search: fixedSearchQuery,
+        page: currentPage,
+        limit: itemsPerPage,
+        category: selectedCategory,
+        subCategory: selectedSubCategory,
+      });
+      
+      setTotalProducts(res.data.count);
+      setProducts(res.data.data);
     } catch (error) {
       handleError(error);
     }
@@ -284,26 +294,6 @@ export default function ProductManagement() {
     currentPage,
     itemsPerPage,
   ]);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await productService.getAllProduct({
-          search: fixedSearchQuery,
-          page: currentPage,
-          limit: itemsPerPage,
-          category: selectedCategory,
-          subCategory: selectedSubCategory,
-        });
-        setTotalProducts(res.data.count);
-        setProducts(res.data.data);
-      } catch (error) {
-        handleError(error);
-      }
-    };
-
-    fetchProducts();
-  }, [handleAddProduct]);
 
   if (selectedProduct) {
     return (
