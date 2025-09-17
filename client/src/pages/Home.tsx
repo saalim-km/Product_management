@@ -203,7 +203,6 @@ export default function ProductManagement() {
         return;
       }
 
-      // Send the formData to your API
       const res = await productService.updateProduct(productId, formData);
 
       // Update the products state with the updated product
@@ -220,7 +219,6 @@ export default function ProductManagement() {
 
       setEditingProduct(null);
       setSelectedProduct(null);
-      toast.success("Product updated successfully!");
     } catch (error) {
       handleError(error);
       toast.error("Failed to update product");

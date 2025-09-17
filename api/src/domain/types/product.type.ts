@@ -17,4 +17,9 @@ export interface ICreateProductDTO {
   images: Express.Multer.File[];
 }
 
-export interface IUpdateProductDTO extends ICreateProductDTO {}
+export interface UpdateProductInput extends Omit<ICreateProductDTO , "images"> {
+  _id : Types.ObjectId;
+  existingImageKeys ?: string[],
+  imagesToDelete ?: string[]
+  images ?: Express.Multer.File[]
+}
