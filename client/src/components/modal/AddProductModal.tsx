@@ -33,6 +33,18 @@ const extractS3KeyFromUrl = (url: string): string => {
   return pathname.startsWith("/") ? pathname.substring(1) : pathname; // Remove leading slash if present
 };
 
+// Valid image MIME types
+const VALID_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/bmp",
+];
+
+// Maximum image size (2MB in bytes)
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+
 export function AddProductModal({
   open,
   onOpenChange,
@@ -50,6 +62,7 @@ export function AddProductModal({
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [existingImageKeys, setExistingImageKeys] = useState<string[]>([]);
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   useEffect(() => {
     if (editingProduct && open) {
@@ -67,12 +80,13 @@ export function AddProductModal({
       
       // Process existing images to extract S3 keys
       const processedExistingImageKeys = editingProduct.images
-        ? editingProduct.images.map(url => extractS3KeyFromUrl(url))
+        ? editingProduct.images.map((url) => extractS3KeyFromUrl(url))
         : [];
       
       setExistingImageKeys(processedExistingImageKeys);
       setImagePreviews(editingProduct.images || []);
       setImagesToDelete([]); // Reset deletion tracking when opening
+      setImageError(null);
     } else if (!editingProduct && open) {
       // Reset only when opening for new product
       setName("");
@@ -83,6 +97,7 @@ export function AddProductModal({
       setImagePreviews([]);
       setExistingImageKeys([]);
       setImagesToDelete([]);
+      setImageError(null);
     }
   }, [editingProduct, open]);
 
@@ -108,16 +123,39 @@ export function AddProductModal({
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length + images.length + imagePreviews.length - imagesToDelete.length > 3) {
+    if (files.length === 0) return;
+
+    // Validate image count
+    const totalImages = images.length + existingImageKeys.length - imagesToDelete.length + files.length;
+    if (totalImages > 3) {
       toast.error("You can upload a maximum of 3 images.");
+      setImageError("Maximum 3 images allowed");
       return;
     }
 
-    const newImages = [...images, ...files];
-    setImages(newImages);
+    // Validate image type and size
+    const validFiles: File[] = [];
+    for (const file of files) {
+      if (!VALID_IMAGE_TYPES.includes(file.type)) {
+        toast.error(`Invalid file type for ${file.name}. Only image files are allowed.`);
+        setImageError("Only valid image files (JPEG, PNG, GIF, WebP, BMP) are allowed");
+        continue;
+      }
+      if (file.size > MAX_IMAGE_SIZE) {
+        toast.error(`File ${file.name} is too large. Maximum size is 2MB.`);
+        setImageError("Each image must be under 2MB");
+        continue;
+      }
+      validFiles.push(file);
+    }
 
+    if (validFiles.length === 0) return;
+
+    setImages([...images, ...validFiles]);
+
+    // Generate previews for valid files
     const previews = await Promise.all(
-      files.map(async (file) => {
+      validFiles.map(async (file) => {
         return new Promise<string>((resolve) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result as string);
@@ -126,17 +164,14 @@ export function AddProductModal({
       })
     );
     setImagePreviews([...imagePreviews, ...previews]);
+    setImageError(null);
   };
 
   const removeImage = (index: number) => {
     // Check if we're removing an existing image (from editing)
     if (editingProduct && index < existingImageKeys.length) {
       const imageKey = existingImageKeys[index];
-      
-      // Add to deletion tracking
       setImagesToDelete([...imagesToDelete, imageKey]);
-      
-      // Remove from existing images
       const newExistingImageKeys = existingImageKeys.filter((_, i) => i !== index);
       setExistingImageKeys(newExistingImageKeys);
     } else {
@@ -149,6 +184,7 @@ export function AddProductModal({
     // Remove from previews
     const newPreviews = imagePreviews.filter((_, i) => i !== index);
     setImagePreviews(newPreviews);
+    setImageError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -173,6 +209,11 @@ export function AddProductModal({
     const totalImages = existingImageKeys.length - imagesToDelete.length + images.length;
     if (totalImages === 0) {
       toast.error("At least one image is required");
+      return;
+    }
+
+    if (totalImages > 3) {
+      toast.error("You can upload a maximum of 3 images.");
       return;
     }
 
@@ -206,7 +247,6 @@ export function AddProductModal({
     }
 
     try {
-      // Pass formData directly to the handler
       await onAdd(formData);
       toast.success(
         editingProduct
@@ -221,6 +261,7 @@ export function AddProductModal({
       setImagePreviews([]);
       setExistingImageKeys([]);
       setImagesToDelete([]);
+      setImageError(null);
       onOpenChange(false);
     } catch (error) {
       toast.error("Failed to save product. Please try again.");
@@ -239,25 +280,26 @@ export function AddProductModal({
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <div>
-              <Label htmlFor="product-name">Title :</Label>
+              <Label htmlFor="product-name" className="text-gray-700">Title:</Label>
               <Input
                 id="product-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="HP AMD Ryzen 3"
+                className="mt-1"
               />
             </div>
 
             <div>
-              <Label className="text-gray-500">Variants :</Label>
+              <Label className="text-gray-700">Variants:</Label>
               <div className="space-y-3 mt-2">
                 {variants.map((variant, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-3 p-3 border rounded-lg"
+                    className="flex items-center gap-3 p-3 border rounded-lg bg-gray-50"
                   >
                     <div className="flex-1">
-                      <Label className="text-sm text-gray-500">RAM:</Label>
+                      <Label className="text-sm text-gray-600">RAM:</Label>
                       <Input
                         value={variant.ram}
                         onChange={(e) =>
@@ -268,7 +310,7 @@ export function AddProductModal({
                       />
                     </div>
                     <div className="flex-1">
-                      <Label className="text-sm text-gray-500">Price:</Label>
+                      <Label className="text-sm text-gray-600">Price:</Label>
                       <div className="relative mt-1">
                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
                           $
@@ -289,7 +331,7 @@ export function AddProductModal({
                       </div>
                     </div>
                     <div className="w-24">
-                      <Label className="text-sm text-gray-500">QTY:</Label>
+                      <Label className="text-sm text-gray-600">QTY:</Label>
                       <div className="flex items-center mt-1">
                         <Button
                           type="button"
@@ -345,7 +387,7 @@ export function AddProductModal({
             </div>
 
             <div>
-              <Label className="mb-2" htmlFor="subcategory">Subcategory : </Label>
+              <Label className="text-gray-700 mb-2" htmlFor="subcategory">Subcategory:</Label>
               <Select
                 value={selectedSubCategory}
                 onValueChange={setSelectedSubCategory}
@@ -370,18 +412,19 @@ export function AddProductModal({
             </div>
 
             <div>
-              <Label className="mb-2" htmlFor="description">Description :</Label>
+              <Label className="text-gray-700 mb-2" htmlFor="description">Description:</Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="The Ryzen 7 is a more high-end processor that compares to the Int..."
                 rows={3}
+                className="mt-1"
               />
             </div>
 
             <div>
-              <Label>Upload Images (Max 3):</Label>
+              <Label className="text-gray-700">Upload Images (Max 3, 2MB each):</Label>
               <div className="flex gap-3 mt-2 flex-wrap">
                 {imagePreviews.map((preview, index) => (
                   <div
@@ -407,7 +450,9 @@ export function AddProductModal({
                 {imagePreviews.length < 3 && (
                   <label
                     htmlFor="image-upload"
-                    className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-50"
+                    className={`w-20 h-20 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-50 ${
+                      imageError ? "border-red-500" : "border-gray-300"
+                    }`}
                   >
                     <Upload className="h-6 w-6 text-gray-400" />
                     <input
@@ -421,6 +466,9 @@ export function AddProductModal({
                   </label>
                 )}
               </div>
+              {imageError && (
+                <p className="text-xs text-red-500 mt-2">{imageError}</p>
+              )}
               {imagesToDelete.length > 0 && (
                 <p className="text-xs text-gray-500 mt-2">
                   {imagesToDelete.length} image(s) marked for deletion
@@ -432,17 +480,17 @@ export function AddProductModal({
           <div className="flex gap-3 justify-center">
             <Button
               type="submit"
-              className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-8"
+              className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-8 rounded-lg"
             >
-              {editingProduct ? "UPDATE" : "ADD"}
+              {editingProduct ? "Update" : "Add"}
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="px-8"
+              className="px-8 rounded-lg"
             >
-              DISCARD
+              Discard
             </Button>
           </div>
         </form>
