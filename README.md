@@ -1,349 +1,272 @@
-<div align="center">
+# Product Management Application
 
-# MERN - Product Management Application
-### *Interview Assignment - Full-Stack Web Application*
+A modern full-stack web application for individuals to efficiently manage their products with secure image handling and real-time data management.
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://aws.amazon.com/)
-[![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
+## Features
 
-*A modern full-stack web application featuring clean architecture, scalable design, and efficient cloud-based image handling*
+- **Product Management**: Create, read, update, and delete products
+- **Image Upload**: Secure direct-to-S3 uploads using presigned URLs
+- **User Authentication**: JWT-based secure authentication system
+- **Performance Optimization**: Redis caching for improved response times
+- **Clean Architecture**: Modular design with separation of concerns
+- **Real-time Updates**: Instant product data synchronization
 
-[🎨 **View Design**](https://www.figma.com/design/VQJvtPqJIM6rFcHa7qa4Ii/Demo?node-id=0-1&node-type=canvas&t=EuT1cf0QBbyqEjFw-0) • [📧 **Contact Developer**](mailto:saalimkm@gmail.com) • [🌐 **Portfolio**](https://salimkm.tech/)
+## Tech Stack
 
-</div>
+### Frontend
+- React with TypeScript
+- CSS3/SCSS for styling
+- Responsive design
 
----
+### Backend
+- Node.js with Express
+- TypeScript
+- Clean Architecture principles
+- Repository pattern implementation
 
-## ✨ **Key Features**
+### Database & Storage
+- MongoDB for data persistence
+- AWS S3 for image storage
+- Redis for caching
 
-<table>
-<tr>
-<td width="50%">
+### Security
+- JWT authentication
+- Bcrypt password hashing
+- Input validation
+- CORS protection
 
-### 🏗️ **Architecture Excellence**
-- **Clean Architecture** principles
-- **Separation of Concerns**
-- **Dependency Injection**
-- **Repository Pattern**
-- **Service Layer Architecture**
+## Prerequisites
 
-</td>
-<td width="50%">
+- Node.js >= 16.0.0
+- npm or yarn
+- MongoDB Atlas account
+- AWS S3 bucket
+- Redis instance
 
-### ⚡ **Performance & Security**
-- **Redis Caching** for optimized performance
-- **JWT Authentication** for secure sessions
-- **AWS S3** presigned URLs for direct uploads
-- **Input Validation** & error handling
-- **CORS** configuration
+## Installation
 
-</td>
-</tr>
-</table>
+1. **Clone the repository**
+   \`\`\`bash
+   git clone <repository-url>
+   cd product-management-app
+   \`\`\`
 
----
+2. **Install backend dependencies**
+   \`\`\`bash
+   cd backend
+   npm install
+   \`\`\`
 
-## 🛠️ **Tech Stack**
+3. **Install frontend dependencies**
+   \`\`\`bash
+   cd ../frontend
+   npm install
+   \`\`\`
 
-<div align="center">
+4. **Environment Configuration**
 
-### **Frontend**
-![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
-![SCSS](https://img.shields.io/badge/SCSS-CC6699?style=flat-square&logo=sass&logoColor=white)
+   Create `backend/.env`:
+   \`\`\`env
+   # Server Configuration
+   PORT=3002
+   NODE_ENV=development
+   
+   # Database
+   MONGODB_URI=your_mongodb_atlas_connection_string
+   
+   # AWS S3
+   AWS_ACCESS_KEY_ID=your_aws_access_key
+   AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+   AWS_REGION=your_aws_region
+   S3_BUCKET_NAME=your_s3_bucket_name
+   
+   # Redis
+   REDIS_URL=your_redis_connection_string
+   
+   # JWT
+   JWT_SECRET=your_jwt_secret
+   JWT_EXPIRES_IN=24h
+   
+   # CORS
+   FRONTEND_URL=http://localhost:5173
+   \`\`\`
 
-### **Backend**
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=node.js&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
-![Express](https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white)
+   Create `frontend/.env`:
+   \`\`\`env
+   REACT_APP_API_URL=http://localhost:3002/api/v_1
+   REACT_APP_ENVIRONMENT=development
+   \`\`\`
 
-### **Database & Cloud**
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)
-![AWS S3](https://img.shields.io/badge/AWS_S3-569A31?style=flat-square&logo=amazon-s3&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white)
+5. **Start the application**
+   \`\`\`bash
+   # Terminal 1 - Backend
+   cd backend && npm run dev
+   
+   # Terminal 2 - Frontend
+   cd frontend && npm start
+   \`\`\`
 
-</div>
+## API Documentation
 
-### 🎯 **Architectural Principles**
-
-> **Clean Architecture Implementation**
-> - 🔄 **Layered Architecture**: Clear separation between presentation, business logic, and data layers
-> - 💉 **Dependency Injection**: Loose coupling between components for better testability
-> - 📚 **Repository Pattern**: Abstracted data access layer for flexibility
-> - 🏢 **Service Layer**: Encapsulated business logic for maintainability
-> - ⚡ **Caching Strategy**: Redis implementation for optimized performance
-
----
-
-## 🚀 **Quick Start**
-
-### 📋 **Prerequisites**
-
-\`\`\`bash
-Node.js >= 16.0.0
-npm or yarn
-MongoDB Atlas account
-AWS S3 bucket
-Redis instance
-\`\`\`
-
-### ⚙️ **Environment Setup**
-
-<details>
-<summary><strong>🔧 Backend Environment Variables</strong></summary>
-
-Create `backend/.env`:
-
-\`\`\`env
-# 🌐 Server Configuration
-PORT=3002
-NODE_ENV=development
-
-# 🗄️ Database
-MONGODB_URI=your_mongodb_atlas_connection_string
-
-# ☁️ AWS S3
-AWS_ACCESS_KEY_ID=your_aws_access_key
-AWS_SECRET_ACCESS_KEY=your_aws_secret_key
-AWS_REGION=your_aws_region
-S3_BUCKET_NAME=your_s3_bucket_name
-
-# ⚡ Redis
-REDIS_URL=your_redis_connection_string
-
-# 🔐 JWT
-JWT_SECRET=your_jwt_secret
-JWT_EXPIRES_IN=24h
-
-# 🌍 CORS
-FRONTEND_URL=http://localhost:5173
-\`\`\`
-
-</details>
-
-<details>
-<summary><strong>🎨 Frontend Environment Variables</strong></summary>
-
-Create `frontend/.env`:
-
-\`\`\`env
-REACT_APP_API_URL=http://localhost:3002/api/v_1
-REACT_APP_ENVIRONMENT=development
-\`\`\`
-
-</details>
-
-### 📦 **Installation**
-
-\`\`\`bash
-# 1️⃣ Clone the repository
-git clone <repository-url>
-cd <project-name>
-
-# 2️⃣ Install backend dependencies
-cd backend && npm install
-
-# 3️⃣ Install frontend dependencies
-cd ../frontend && npm install
-
-# 4️⃣ Start development servers
-# Terminal 1 - Backend
-cd backend && npm run dev
-
-# Terminal 2 - Frontend  
-cd frontend && npm start
-\`\`\`
-
----
-
-## 📡 **API Documentation**
-
-<div align="center">
-
-### **Available Endpoints**
-
-</div>
-
+### Authentication Endpoints
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| `POST` | `/api/v_1/auth/register` | 👤 User registration | ❌ |
-| `POST` | `/api/v_1/auth/login` | 🔐 User login | ❌ |
-| `POST` | `/api/v_1/product` | 📤 Get presigned URL for upload | ✅ |
-| `GET` | `/api/v_1/product` | 📋 Get all products | ✅ |
-| `PUT` | `/api/v_1/product/:id` | 📋 Update Product | ✅ |
-| `DELETE` | `/api/v_1/:id` | 🗑️ Delete product | ✅ |
+| `POST` | `/api/v_1/auth/register` | User registration | No |
+| `POST` | `/api/v_1/auth/login` | User login | No |
 
----
+### Product Endpoints
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| `POST` | `/api/v_1/product` | Create product & get presigned URL | Yes |
+| `GET` | `/api/v_1/product` | Get all products | Yes |
+| `PUT` | `/api/v_1/product/:id` | Update product | Yes |
+| `DELETE` | `/api/v_1/product/:id` | Delete product | Yes |
 
-## 🎯 **Core Features**
+## Usage
 
-### 📤 **Image Upload System**
+1. **Register/Login**: Create an account or login to access the application
+2. **Add Products**: Create new products with images and details
+3. **Manage Products**: View, edit, or delete existing products
+4. **Image Upload**: Upload product images directly to AWS S3
+5. **Search & Filter**: Find products quickly with built-in search functionality
 
-\`\`\`typescript
-// Presigned URL generation with Redis caching
-const presignedUrl = await generatePresignedUrl(fileName);
-// Direct-to-S3 upload with security
-await uploadToS3(presignedUrl, file);
-// Cached URLs prevent regeneration overhead
-\`\`\`
+## Architecture
 
-**Key Benefits:**
-- 🔒 **Secure**: Presigned URLs with expiration
-- ⚡ **Fast**: Redis caching prevents URL regeneration
-- 🎯 **Direct**: Client uploads directly to S3
-- 🛡️ **Safe**: Server-side validation and error handling
+The application follows clean architecture principles:
 
-### 🔐 **Authentication & Security**
+- **Presentation Layer**: React components and UI logic
+- **Service Layer**: Business logic and API calls
+- **Repository Layer**: Data access abstraction
+- **Infrastructure Layer**: External services (AWS S3, Redis, MongoDB)
 
-- **JWT-based** session management
-- **Bcrypt** password hashing
-- **Input validation** on all endpoints
-- **CORS** protection
-- **Environment-based** configuration
+### Key Design Patterns
+- Repository Pattern for data access
+- Dependency Injection for loose coupling
+- Service Layer for business logic
+- Caching Strategy with Redis
 
----
+## Development
 
-## 🧪 **Testing & Development**
+### Available Scripts
 
-<div align="center">
+**Backend:**
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build TypeScript to JavaScript
+- `npm test` - Run test suite
+- `npm start` - Start production server
 
-### **Available Scripts**
+**Frontend:**
+- `npm start` - Start development server
+- `npm run build` - Build for production
+- `npm test` - Run tests
+- `npm run lint` - Run ESLint
 
-</div>
+### Code Style
 
-| Component | Command | Description |
-|-----------|---------|-------------|
-| **Backend** | `npm run dev` | 🔥 Start with hot reload |
-| | `npm run build` | 🏗️ Build TypeScript |
-| | `npm test` | 🧪 Run test suite |
-| **Frontend** | `npm start` | 🚀 Start development server |
-| | `npm run build` | 📦 Build for production |
-| | `npm test` | ✅ Run tests |
-| | `npm run lint` | 🔍 Code linting |
+- Use TypeScript for type safety
+- Follow ESLint configuration
+- Use meaningful commit messages
+- Write unit tests for new features
 
----
+## Deployment
 
-## 🚀 **Deployment**
+### Production Build
+1. **Backend**: Run `npm run build` and deploy the `dist` folder
+2. **Frontend**: Run `npm run build` and deploy the `build` folder
+3. **Environment**: Set production environment variables
+4. **Database**: Ensure MongoDB Atlas is configured for production
 
-<details>
-<summary><strong>🌐 Production Deployment Guide</strong></summary>
-
-### **Backend Deployment**
-1. Build the application: `npm run build`
-2. Set production environment variables
-3. Deploy to your platform (Heroku, AWS, Railway, etc.)
-
-### **Frontend Deployment**
-1. Build the application: `npm run build`
-2. Deploy the `build` folder to hosting service
-3. Configure environment variables for production API
-
-### **Recommended Platforms**
+### Recommended Platforms
 - **Backend**: Railway, Heroku, AWS EC2
 - **Frontend**: Vercel, Netlify, AWS S3 + CloudFront
 - **Database**: MongoDB Atlas
 - **Cache**: Redis Cloud, AWS ElastiCache
 
-</details>
+## Contributing
 
----
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## 🤝 **Contributing**
+### Commit Convention
+- `feat:` New features
+- `fix:` Bug fixes
+- `docs:` Documentation updates
+- `style:` Code formatting
+- `refactor:` Code refactoring
+- `test:` Adding tests
 
-<div align="center">
+## Testing
 
-### **Development Workflow**
-
-</div>
+Run the test suite to ensure everything works correctly:
 
 \`\`\`bash
-# 1️⃣ Fork the repository
-git fork <repository-url>
+# Backend tests
+cd backend && npm test
 
-# 2️⃣ Create feature branch
-git checkout -b feature/amazing-feature
-
-# 3️⃣ Commit changes
-git commit -m 'feat: add amazing feature'
-
-# 4️⃣ Push to branch
-git push origin feature/amazing-feature
-
-# 5️⃣ Open Pull Request
+# Frontend tests
+cd frontend && npm test
 \`\`\`
 
-### 📝 **Commit Convention**
+## Performance
 
-| Type | Description | Example |
-|------|-------------|---------|
-| `feat:` | ✨ New features | `feat: add user authentication` |
-| `fix:` | 🐛 Bug fixes | `fix: resolve login validation` |
-| `docs:` | 📚 Documentation | `docs: update API documentation` |
-| `style:` | 💄 Code style | `style: format code with prettier` |
-| `refactor:` | ♻️ Code refactoring | `refactor: optimize image service` |
-| `test:` | 🧪 Tests | `test: add authentication tests` |
+- **API Response Time**: < 200ms average
+- **Image Upload**: Direct-to-S3 for optimal speed
+- **Caching**: Redis implementation for frequently accessed data
+- **Database**: Optimized MongoDB queries with indexing
 
----
+## Security
 
-## 📊 **Performance Metrics**
+- JWT tokens for authentication
+- Bcrypt for password hashing
+- Input validation on all endpoints
+- CORS configuration
+- Presigned URLs for secure S3 uploads
+- Environment variable protection
 
-<div align="center">
+## Troubleshooting
 
-| Metric | Target | Current |
-|--------|--------|---------|
-| **API Response Time** | < 200ms | ⚡ 150ms |
-| **Image Upload Speed** | < 5s | 🚀 3.2s |
-| **Cache Hit Rate** | > 80% | 📈 85% |
-| **Test Coverage** | > 90% | ✅ 92% |
+### Common Issues
 
-</div>
+1. **MongoDB Connection**: Ensure your IP is whitelisted in MongoDB Atlas
+2. **AWS S3 Access**: Verify AWS credentials and bucket permissions
+3. **Redis Connection**: Check Redis URL and connection status
+4. **CORS Errors**: Ensure frontend URL is configured in backend environment
 
----
+## License
 
-## 🔍 **Monitoring & Analytics**
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-- 📊 **Request/Response** logging
-- 🚨 **Error tracking** and reporting  
-- ⚡ **Performance** monitoring
-- 📈 **Redis cache** hit/miss metrics
-- 🔍 **Database query** optimization
+\`\`\`
+MIT License
 
----
+Copyright (c) 2024 Product Management Application
 
-<div align="center">
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-## 👨‍💻 **About the Developer**
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-**Salim K M** - *Full Stack Developer*
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+\`\`\`
 
-[![Portfolio](https://img.shields.io/badge/Portfolio-000000?style=for-the-badge&logo=About.me&logoColor=white)](https://salimkm.tech/)
-[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:saalimkm@gmail.com)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/salim-k-m-3ab7ba246/)
+## Support
 
-📍 **Kochi, Kerala, India**
-
----
-
-### 🏆 **Project Status**
-
-![Status](https://img.shields.io/badge/Status-Interview_Assignment-success?style=for-the-badge)
-![Company](https://img.shields.io/badge/Company-SECLOB_TECHNOLOGIES-blue?style=for-the-badge)
-
-*This application demonstrates proficiency in modern MERN stack development with clean architecture patterns and cloud integration.*
+If you encounter any issues or have questions, please open an issue in the repository.
 
 ---
 
-**⭐ If you found this project helpful, please give it a star!**
-
-</div>
-
----
-
-<div align="center">
-<sub>Built with ❤️ using modern web technologies</sub>
-</div>
+**Built with modern web technologies for efficient product management.**
