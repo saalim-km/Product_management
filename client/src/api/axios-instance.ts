@@ -13,7 +13,7 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && error.response?.message === "Unauthorized access." && !originalRequest._retry) {
       console.log("access token expire triggered");
       originalRequest._retry = true;
 
