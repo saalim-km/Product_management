@@ -52,3 +52,52 @@ export const getAllProductsSchema = z.object({
   category: optionalObjectIdSchema,
   subCategory: optionalObjectIdSchema,
 });
+
+
+
+export const updateProductSchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  subCategory: objectIdSchema,
+  variants: z
+    .string()
+    .transform((val) => {
+      try {
+        return JSON.parse(val);
+      } catch {
+        throw new Error("Invalid JSON for variants");
+      }
+    })
+    .pipe(z.array(variantSchema).min(1, "At least one variant is required")),
+  images: z
+    .preprocess(
+      (val) => (Array.isArray(val) ? val : val ? [val] : []),
+      z.array(z.custom<Express.Multer.File>())
+    )
+    .optional(),
+  existingImageKeys: z
+    .preprocess(
+      (val) => {
+        try {
+          return typeof val === "string" ? JSON.parse(val) : val;
+        } catch {
+          throw new Error("Invalid JSON for existingImageKeys");
+        }
+      },
+      z.array(z.string()) // Changed from z.string().url() to z.string()
+    )
+    .optional(),
+  imagesToDelete: z
+    .preprocess(
+      (val) => {
+        try {
+          return typeof val === "string" ? JSON.parse(val) : val;
+        } catch {
+          throw new Error("Invalid JSON for imagesToDelete");
+        }
+      },
+      z.array(z.string()).optional() // Array of S3 keys (strings)
+    )
+    .optional(),
+  _id: objectIdSchema, // Added _id field for product identification
+});

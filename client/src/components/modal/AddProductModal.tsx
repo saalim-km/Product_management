@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { Plus, Minus, Upload } from "lucide-react";
+import { Plus, Minus, Upload, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import type { IProduct, ISubCategory, IVariant } from "../../types/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
@@ -21,10 +21,17 @@ import { toast } from "sonner";
 interface AddProductModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdd: (product: FormData | Omit<IProduct, "_id">) => void | Promise<void>; // Allow async
+  onAdd: (product: FormData | Omit<IProduct, "_id">) => void | Promise<void>;
   subCategories: ISubCategory[];
   editingProduct?: IProduct | null;
 }
+
+// S3 Key extraction utility function
+const extractS3KeyFromUrl = (url: string): string => {
+  const urlObj = new URL(url);
+  const pathname = urlObj.pathname;
+  return pathname.startsWith("/") ? pathname.substring(1) : pathname; // Remove leading slash if present
+};
 
 export function AddProductModal({
   open,
@@ -41,12 +48,14 @@ export function AddProductModal({
   ]);
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [existingImageKeys, setExistingImageKeys] = useState<string[]>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
 
   useEffect(() => {
-    if (editingProduct) {
+    if (editingProduct && open) {
       setName(editingProduct.name);
       setDescription(editingProduct.description || "");
-      setSelectedSubCategory(editingProduct.subCategory);
+      setSelectedSubCategory((editingProduct.subCategory as any)._id);
       setVariants(
         editingProduct.variants.map((v) => ({
           ram: v.ram,
@@ -54,15 +63,26 @@ export function AddProductModal({
           qty: v.qty,
         }))
       );
-      setImages([]); // Reset images for editing
-      setImagePreviews(editingProduct.images || []); // Use existing images for previews
-    } else {
+      setImages([]);
+      
+      // Process existing images to extract S3 keys
+      const processedExistingImageKeys = editingProduct.images
+        ? editingProduct.images.map(url => extractS3KeyFromUrl(url))
+        : [];
+      
+      setExistingImageKeys(processedExistingImageKeys);
+      setImagePreviews(editingProduct.images || []);
+      setImagesToDelete([]); // Reset deletion tracking when opening
+    } else if (!editingProduct && open) {
+      // Reset only when opening for new product
       setName("");
       setDescription("");
       setSelectedSubCategory("");
       setVariants([{ ram: "4 GB", price: 529.99, qty: 1 }]);
       setImages([]);
       setImagePreviews([]);
+      setExistingImageKeys([]);
+      setImagesToDelete([]);
     }
   }, [editingProduct, open]);
 
@@ -88,7 +108,7 @@ export function AddProductModal({
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length + images.length > 3) {
+    if (files.length + images.length + imagePreviews.length - imagesToDelete.length > 3) {
       toast.error("You can upload a maximum of 3 images.");
       return;
     }
@@ -96,7 +116,6 @@ export function AddProductModal({
     const newImages = [...images, ...files];
     setImages(newImages);
 
-    // Generate base64 previews for raw files
     const previews = await Promise.all(
       files.map(async (file) => {
         return new Promise<string>((resolve) => {
@@ -110,13 +129,28 @@ export function AddProductModal({
   };
 
   const removeImage = (index: number) => {
-    const newImages = images.filter((_, i) => i !== index);
+    // Check if we're removing an existing image (from editing)
+    if (editingProduct && index < existingImageKeys.length) {
+      const imageKey = existingImageKeys[index];
+      
+      // Add to deletion tracking
+      setImagesToDelete([...imagesToDelete, imageKey]);
+      
+      // Remove from existing images
+      const newExistingImageKeys = existingImageKeys.filter((_, i) => i !== index);
+      setExistingImageKeys(newExistingImageKeys);
+    } else {
+      // Remove from new images (adjust index for existing images offset)
+      const newImageIndex = index - existingImageKeys.length + imagesToDelete.length;
+      const newImages = images.filter((_, i) => i !== newImageIndex);
+      setImages(newImages);
+    }
+    
+    // Remove from previews
     const newPreviews = imagePreviews.filter((_, i) => i !== index);
-    setImages(newImages);
     setImagePreviews(newPreviews);
   };
 
-  // ...existing code...
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -136,58 +170,44 @@ export function AddProductModal({
       return;
     }
 
-    // For both new products AND editing products, at least one image is required
-    // Either existing images or new uploads
-    const hasExistingImages =
-      editingProduct?.images && editingProduct.images.length > 0;
-    const hasNewImages = images.length > 0;
-
-    if (!hasExistingImages && !hasNewImages) {
+    const totalImages = existingImageKeys.length - imagesToDelete.length + images.length;
+    if (totalImages === 0) {
       toast.error("At least one image is required");
-      return;
-    }
-
-    // Additional validation for editing - ensure we have at least one image (existing or new)
-    if (editingProduct && !hasExistingImages && !hasNewImages) {
-      toast.error("Product must have at least one image");
       return;
     }
 
     const formData = new FormData();
     formData.append("name", name.trim());
-
-    if (description.trim()) {
-      formData.append("description", description.trim());
-    } else {
-      // Even if description is empty, send it as empty string
-      formData.append("description", "");
-    }
-
+    formData.append("description", description.trim() || "");
     formData.append("subCategory", selectedSubCategory);
     formData.append(
       "variants",
       JSON.stringify(variants.filter((v) => v.ram && v.price > 0))
     );
 
+    // Append existing image keys
+    if (existingImageKeys.length > 0) {
+      formData.append("existingImageKeys", JSON.stringify(existingImageKeys));
+    }
+
+    // Append images to delete (for editing only)
+    if (editingProduct && imagesToDelete.length > 0) {
+      formData.append("imagesToDelete", JSON.stringify(imagesToDelete));
+    }
+
     // Append raw image files (binary)
     images.forEach((image) => {
       formData.append("images", image);
     });
 
-    // If editing, send existing image URLs/IDs separately
+    // If editing, send the product ID
     if (editingProduct) {
-      if (editingProduct.images?.length) {
-        formData.append(
-          "existingImages",
-          JSON.stringify(editingProduct.images)
-        );
-      }
       formData.append("_id", editingProduct._id as string);
     }
 
     try {
       // Pass formData directly to the handler
-      onAdd(formData);
+      await onAdd(formData);
       toast.success(
         editingProduct
           ? "Product updated successfully!"
@@ -199,12 +219,13 @@ export function AddProductModal({
       setVariants([{ ram: "4 GB", price: 529.99, qty: 1 }]);
       setImages([]);
       setImagePreviews([]);
+      setExistingImageKeys([]);
+      setImagesToDelete([]);
       onOpenChange(false);
     } catch (error) {
       toast.error("Failed to save product. Please try again.");
     }
   };
-  // ...existing code...
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -301,6 +322,7 @@ export function AddProductModal({
                     </div>
                     {variants.length > 1 && (
                       <Button
+                        className="ml-10"
                         type="button"
                         size="sm"
                         variant="destructive"
@@ -323,13 +345,19 @@ export function AddProductModal({
             </div>
 
             <div>
-              <Label htmlFor="subcategory">Subcategory :</Label>
+              <Label className="mb-2" htmlFor="subcategory">Subcategory : </Label>
               <Select
                 value={selectedSubCategory}
                 onValueChange={setSelectedSubCategory}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a subcategory" />
+                  <SelectValue placeholder="Select a subcategory">
+                    {selectedSubCategory
+                      ? subCategories.find(
+                          (cat) => cat._id === selectedSubCategory
+                        )?.name
+                      : "Select a subcategory"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {subCategories.map((subCategory) => (
@@ -342,7 +370,7 @@ export function AddProductModal({
             </div>
 
             <div>
-              <Label htmlFor="description">Description :</Label>
+              <Label className="mb-2" htmlFor="description">Description :</Label>
               <Textarea
                 id="description"
                 value={description}
@@ -372,7 +400,7 @@ export function AddProductModal({
                       className="absolute top-0 right-0 -mt-2 -mr-2 h-6 w-6 rounded-full"
                       onClick={() => removeImage(index)}
                     >
-                      X
+                      <X className="h-3 w-3" />
                     </Button>
                   </div>
                 ))}
@@ -393,6 +421,11 @@ export function AddProductModal({
                   </label>
                 )}
               </div>
+              {imagesToDelete.length > 0 && (
+                <p className="text-xs text-gray-500 mt-2">
+                  {imagesToDelete.length} image(s) marked for deletion
+                </p>
+              )}
             </div>
           </div>
 

@@ -43,6 +43,7 @@ export const SUCCESS_MESSAGES = {
 };
 
 export const ERROR_MESSAGES = {
+  PRODUCT_NOT_FOUND : "Product not found, please try again later",
   SUBCATEGORY_ALREADY_LINKED : "Category linked to subcategories – cannot delete",
   SESSION_ALREADY_COMPLETED : "Session already marked as completed",
   TOKEN_BLACKLISTED : "Access token is blacklisted. Please log in again.",

@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import {
   createProductSchema,
   getAllProductsSchema,
+  updateProductSchema,
 } from "../../shared/utils/validation/product.validation";
 import { ResponseHandler } from "../../shared/utils/helper/response-handler";
 import { SUCCESS_MESSAGES } from "../../shared/constants/constant";
@@ -32,21 +33,18 @@ export class ProductController {
     ResponseHandler.success(res, SUCCESS_MESSAGES.CREATED, product);
   }
 
-  // async updateProduct(req: Request, res: Response) {
-  //   const payload = createProductSchema.parse({
-  //     ...req.body,
-  //     images: (
-  //       req.files as { [fieldname: string]: Express.Multer.File[] } | undefined
-  //     )?.images,
-  //   });
+  async updateProduct(req: Request, res: Response) {
+    const userId = objectIdSchema.parse((req as CustomRequest).user._id);
+    const payload = updateProductSchema.parse({
+      ...req.body,
+      images: (
+        req.files as { [fieldname: string]: Express.Multer.File[] } | undefined
+      )?.images,
+    });
 
-  //   const userId = objectIdSchema.parse((req as CustomRequest).user._id);
-  //   const product = await this._productUsecase.updateProduct({
-  //     ...payload,
-  //     user: userId,
-  //   });
-  //   ResponseHandler.success(res, SUCCESS_MESSAGES.CREATED, product);
-  // }
+    const product = await this._productUsecase.updateProduct({...payload,user:userId});
+    ResponseHandler.success(res, SUCCESS_MESSAGES.UPDATE_SUCCESS , product);
+  }
 
   async getAllProducts(req: Request, res: Response) {
     const userId = objectIdSchema.parse((req as CustomRequest).user._id);
