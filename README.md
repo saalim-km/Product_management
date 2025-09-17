@@ -202,13 +202,12 @@ The application follows clean architecture principles:
 
 Run the test suite to ensure everything works correctly:
 
-\`\`\`bash
 # Backend tests
 cd backend && npm test
 
 # Frontend tests
 cd frontend && npm test
-\`\`\`
+
 
 ## Performance
 
