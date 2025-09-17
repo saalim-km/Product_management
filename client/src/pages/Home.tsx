@@ -78,7 +78,7 @@ export default function ProductManagement() {
   const handleAddSubCategory = async (
     subCategory: Omit<ISubCategory, "_id">
   ) => {
-    try { 
+    try {
       const res = await CategoryService.addSubCategory(
         subCategory.category,
         subCategory.name
@@ -93,7 +93,6 @@ export default function ProductManagement() {
   const handleAddProduct = async (product: Omit<IProduct, "_id">) => {
     try {
       const res = await productService.createProduct(product);
-      setProducts((prev) => [res.data,...prev])
       toast.success("Product added successfully!");
     } catch (error) {
       handleError(error);
@@ -285,6 +284,26 @@ export default function ProductManagement() {
     currentPage,
     itemsPerPage,
   ]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await productService.getAllProduct({
+          search: fixedSearchQuery,
+          page: currentPage,
+          limit: itemsPerPage,
+          category: selectedCategory,
+          subCategory: selectedSubCategory,
+        });
+        setTotalProducts(res.data.count);
+        setProducts(res.data.data);
+      } catch (error) {
+        handleError(error);
+      }
+    };
+
+    fetchProducts();
+  }, [handleAddProduct]);
 
   if (selectedProduct) {
     return (
