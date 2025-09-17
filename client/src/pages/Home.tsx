@@ -92,7 +92,7 @@ export default function ProductManagement() {
 
   const handleAddProduct = async (product: Omit<IProduct, "_id">) => {
     try {
-      const res = await productService.createProduct(product);
+      await productService.createProduct(product);
       toast.success("Product added successfully!");
     } catch (error) {
       handleError(error);
