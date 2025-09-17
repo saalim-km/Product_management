@@ -200,9 +200,11 @@ export class ProductUsecase implements IProductUsecase {
         );
       }
 
-      const imagesUrls = await Promise.all(updatedProduct.images.map((key)=> {
-        return this._presignedUrl.getPresignedUrl(key)
-      }))
+      const imagesUrls = await Promise.all(
+        updatedProduct.images.map((key) => {
+          return this._presignedUrl.getPresignedUrl(key);
+        })
+      );
       updatedProduct.images = imagesUrls;
       return updatedProduct;
     } catch (error) {
@@ -221,5 +223,18 @@ export class ProductUsecase implements IProductUsecase {
         await cleanUpLocalFiles(images);
       }
     }
+  }
+
+  async getProductById(productId: Types.ObjectId): Promise<IProduct> {
+    const isProductExists = await this._productRepo.findById(productId)
+    if(!isProductExists) {
+      throw new CustomError(ERROR_MESSAGES.PRODUCT_NOT_FOUND,HTTP_STATUS.BAD_REQUEST)
+    }
+
+    const imageUrls = await Promise.all(isProductExists.images.map((key)=> {
+      return this._presignedUrl.getPresignedUrl(key)
+    }))
+    isProductExists.images = imageUrls;
+    return isProductExists;
   }
 }

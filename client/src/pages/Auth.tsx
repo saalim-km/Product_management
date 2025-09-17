@@ -2,24 +2,8 @@
 
 import { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import {
-  Eye,
-  EyeOff,
-  User,
-  Mail,
-  Lock,
-  ArrowRight,
-  CheckCircle,
-} from "lucide-react";
-import { Label } from "../components/ui/label";
+import { Eye, EyeOff, User, Mail, Lock } from "lucide-react";
 import { Button } from "../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { useDispatch } from "react-redux";
 import { AuthService } from "../services/auth.service";
@@ -32,7 +16,6 @@ import { userLogin } from "../store/slices/user.slice";
 export function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
 
@@ -43,17 +26,17 @@ export function AuthPage() {
     fullName: "",
   };
 
-  const handleSubmit = async (values: typeof initialValues) => {
+  const handleSubmit = async (values: any) => {
     setIsSubmitting(true);
 
     if (isLogin) {
       try {
         const res = await AuthService.login(values.email, values.password);
         toast.success("Logged in successfully!");
-        dispatch(userLogin(res.data))
+        dispatch(userLogin(res.data));
       } catch (error) {
         handleError(error);
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       }
     } else {
       try {
@@ -64,10 +47,10 @@ export function AuthPage() {
         );
         toast.success("Account created successfully!");
         setIsLogin(true);
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       } catch (error) {
         handleError(error);
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       }
     }
   };
@@ -77,215 +60,270 @@ export function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-indigo-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Card className="w-full shadow-xl rounded-2xl overflow-hidden border-0 bg-white">
-          <div className="bg-gradient-to-r from-orange-600 to-orange-600 h-2 w-full"></div>
-          <CardHeader className="text-center pb-2">
-            <div className="mx-auto bg-orange-100 rounded-full p-3 w-16 h-16 flex items-center justify-center mb-4">
-              {isLogin ? (
-                <User className="h-8 w-8 text-orange-600" />
-              ) : (
-                <CheckCircle className="h-8 w-8 text-orange-600" />
-              )}
-            </div>
-            <CardTitle className="text-2xl font-semibold text-gray-800">
-              {isLogin ? "Welcome Back" : "Create Account"}
-            </CardTitle>
-            <CardDescription className="text-gray-500 mt-2">
-              {isLogin
-                ? "Sign in to continue to your Product Management account"
-                : "Get started with your Product Management account"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-4">
-            <Formik
-              initialValues={initialValues}
-              validationSchema={isLogin ? loginSchema : signupSchema}
-              onSubmit={handleSubmit}
-            >
-              {({ errors, touched }) => (
-                <Form className="space-y-4">
-                  {!isLogin && (
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="fullName"
-                        className="text-gray-700 flex items-center"
+    <div className="min-h-screen flex">
+      {isLogin ? (
+        <>
+          {/* Login Mode: Form on left, Welcome on right */}
+          <div className="flex-1 bg-gray-50 flex items-center justify-center px-8">
+            <div className="w-full max-w-md">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-orange-500 mb-2">
+                  Sign In to
+                </h2>
+                <h2 className="text-3xl font-bold text-orange-500 mb-6">
+                  Your Account
+                </h2>
+              </div>
+
+              <Formik
+                initialValues={initialValues}
+                validationSchema={loginSchema}
+                onSubmit={handleSubmit}
+              >
+                {({ errors, touched }) => (
+                  <Form className="space-y-6">
+                    <div className="relative flex flex-col">
+                      <div className="relative">
+                        <Field
+                          as={Input}
+                          id="email"
+                          name="email"
+                          type="email"
+                          placeholder="Email"
+                          className={`pl-12 py-8 bg-gray-100 border-0 rounded-lg text-gray-700 placeholder-gray-400 w-full ${
+                            errors.email && touched.email
+                              ? "ring-2 ring-red-500"
+                              : "focus:ring-2 focus:ring-orange-500"
+                          }`}
+                        />
+                        <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      </div>
+                      <ErrorMessage
+                        name="email"
+                        component="div"
+                        className="text-red-500 text-sm mt-1 ml-2"
+                      />
+                    </div>
+
+                    <div className="relative flex flex-col">
+                      <div className="relative">
+                        <Field
+                          as={Input}
+                          id="password"
+                          name="password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Password"
+                          className={`pl-12 pr-12 py-8 bg-gray-100 border-0 rounded-lg text-gray-700 placeholder-gray-400 w-full ${
+                            errors.password && touched.password
+                              ? "ring-2 ring-red-500"
+                              : "focus:ring-2 focus:ring-orange-500"
+                          }`}
+                        />
+                        <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <button
+                          type="button"
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-5 w-5 cursor-pointer" />
+                          ) : (
+                            <Eye className="h-5 w-5 cursor-pointer" />
+                          )}
+                        </button>
+                      </div>
+                      <ErrorMessage
+                        name="password"
+                        component="div"
+                        className="text-red-500 text-sm mt-1 ml-2"
+                      />
+                    </div>
+
+                    <div className="flex align-middle justify-center">
+                      <Button
+                        type="submit"
+                        className="cursor-pointer w-[300px]  bg-orange-500 hover:bg-orange-300 text-white py-8 px-6 rounded-full font-semibold text-base "
+                        disabled={isSubmitting}
                       >
-                        <User className="h-4 w-4 mr-1" />
-                        Full Name
-                      </Label>
+                        {isSubmitting ? (
+                          <div className="flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                            Signing In...
+                          </div>
+                        ) : (
+                          "SIGN IN"
+                        )}
+                      </Button>
+                    </div>
+                  </Form>
+                )}
+              </Formik>
+            </div>
+          </div>
+
+          {/* Right Panel - Dark Blue Gradient for Login */}
+          <div className="flex-1 bg-gradient-to-br from-blue-900 via-blue-800 to-teal-700 relative overflow-hidden flex items-center justify-center">
+            <div className="absolute top-20 right-1/4 w-16 h-16 bg-blue-600/30 rotate-45"></div>
+            <div className="absolute bottom-32 right-20 w-24 h-24 bg-blue-500/20 rotate-45"></div>
+            <div className="absolute bottom-20 left-20 w-20 h-20 bg-teal-500/20 rotate-45"></div>
+            <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-blue-400/10 rounded-full"></div>
+            <div className="absolute bottom-1/3 right-1/3 w-20 h-20 bg-teal-400/20"></div>
+
+            <div className="text-center text-white z-10 px-8">
+              <h1 className="text-4xl font-bold mb-4">Hello Friend!</h1>
+              <p className="text-blue-100 mb-8 max-w-sm mx-auto leading-relaxed">
+                Enter your personal details and start your journey with us
+              </p>
+              <button
+                onClick={toggleAuthMode}
+                className="border-2 cursor-pointer border-white text-white px-8 py-2 rounded-full font-medium hover:bg-white hover:text-blue-900 transition-all duration-300"
+              >
+                SIGN UP
+              </button>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Signup Mode: Welcome on left, Form on right */}
+          <div className="flex-1 bg-gradient-to-br from-blue-900 via-blue-800 to-teal-700 relative overflow-hidden flex items-center justify-center">
+            <div className="absolute top-20 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-blue-600/30 rotate-45"></div>
+            <div className="absolute bottom-32 left-20 w-24 h-24 bg-blue-500/20 rotate-45"></div>
+            <div className="absolute bottom-20 right-20 w-20 h-20 bg-teal-500/20 rotate-45"></div>
+            <div className="absolute top-1/2 right-1/4 w-32 h-32 bg-blue-400/10 rounded-full"></div>
+
+            <div className="text-center text-white z-10 px-8">
+              <h1 className="text-4xl font-bold mb-4">Welcome Back!</h1>
+              <p className="text-blue-100 mb-8 max-w-sm mx-auto leading-relaxed">
+                To keep connected with us please login with your personal info
+              </p>
+              <button
+                onClick={toggleAuthMode}
+                className="border-2 cursor-pointer border-white text-white px-8 py-2 rounded-full font-medium hover:bg-white hover:text-blue-900 transition-all duration-300"
+              >
+                SIGN IN
+              </button>
+            </div>
+          </div>
+
+          {/* Right Panel - Light Background with Signup Form */}
+          <div className="flex-1 bg-gray-50 flex items-center justify-center px-8">
+            <div className="w-full max-w-md">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-orange-400 mb-6">
+                  Create Account
+                </h2>
+              </div>
+
+              <Formik
+                initialValues={initialValues}
+                validationSchema={signupSchema}
+                onSubmit={handleSubmit}
+              >
+                {({ errors, touched }) => (
+                  <Form className="space-y-6">
+                    <div className="relative flex flex-col">
                       <div className="relative">
                         <Field
                           as={Input}
                           id="fullName"
                           name="fullName"
-                          placeholder="Enter your full name"
-                          className={`pl-10 ${
+                          placeholder="Name"
+                          className={`pl-12 py-8 bg-gray-100 border-0 rounded-lg text-gray-700 placeholder-gray-400 w-full ${
                             errors.fullName && touched.fullName
-                              ? "border-red-500"
-                              : "border-gray-300 focus:border-orange-500"
+                              ? "ring-2 ring-red-500"
+                              : "focus:ring-2 focus:ring-orange-500"
                           }`}
                         />
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <User className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                       </div>
                       <ErrorMessage
                         name="fullName"
                         component="div"
-                        className="text-red-500 text-sm flex items-center mt-1"
+                        className="text-red-400 text-sm mt-1 ml-2"
                       />
                     </div>
-                  )}
 
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="email"
-                      className="text-gray-700 flex items-center"
-                    >
-                      <Mail className="h-4 w-4 mr-1" />
-                      Email
-                    </Label>
-                    <div className="relative">
-                      <Field
-                        as={Input}
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="Enter your email"
-                        className={`pl-10 ${
-                          errors.email && touched.email
-                            ? "border-red-500"
-                            : "border-gray-300 focus:border-orange-500"
-                        }`}
-                      />
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    </div>
-                    <ErrorMessage
-                      name="email"
-                      component="div"
-                      className="text-red-500 text-sm flex items-center mt-1"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="password"
-                      className="text-gray-700 flex items-center"
-                    >
-                      <Lock className="h-4 w-4 mr-1" />
-                      Password
-                    </Label>
-                    <div className="relative">
-                      <Field
-                        as={Input}
-                        id="password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
-                        className={`pr-10 ${
-                          errors.password && touched.password
-                            ? "border-red-500"
-                            : "border-gray-300 focus:border-orange-500"
-                        }`}
-                      />
-                      <button
-                        type="button"
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-                    <ErrorMessage
-                      name="password"
-                      component="div"
-                      className="text-red-500 text-sm flex items-center mt-1"
-                    />
-                  </div>
-
-                  {!isLogin && (
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="confirmPassword"
-                        className="text-gray-700 flex items-center"
-                      >
-                        <Lock className="h-4 w-4 mr-1" />
-                        Confirm Password
-                      </Label>
+                    <div className="relative flex flex-col">
                       <div className="relative">
                         <Field
                           as={Input}
-                          id="confirmPassword"
-                          name="confirmPassword"
-                          type={showConfirmPassword ? "text" : "password"}
-                          placeholder="Confirm your password"
-                          className={`pr-10 ${
-                            errors.confirmPassword && touched.confirmPassword
-                              ? "border-red-500"
-                              : "border-gray-300 focus:border-orange-500"
+                          id="email"
+                          name="email"
+                          type="email"
+                          placeholder="Email"
+                          className={`pl-12 py-8 bg-gray-100 border-0 rounded-lg text-gray-700 placeholder-gray-400 w-full ${
+                            errors.email && touched.email
+                              ? "ring-2 ring-red-500"
+                              : "focus:ring-2 focus:ring-orange-500"
                           }`}
                         />
+                        <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      </div>
+                      <ErrorMessage
+                        name="email"
+                        component="div"
+                        className="text-red-500 text-sm mt-1 ml-2"
+                      />
+                    </div>
+
+                    <div className="relative flex flex-col">
+                      <div className="relative">
+                        <Field
+                          as={Input}
+                          id="password"
+                          name="password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Password"
+                          className={`pl-12 pr-12 py-8 bg-gray-100 border-0 rounded-lg text-gray-700 placeholder-gray-400 w-full ${
+                            errors.password && touched.password
+                              ? "ring-2 ring-red-500"
+                              : "focus:ring-2 focus:ring-orange-500"
+                          }`}
+                        />
+                        <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                         <button
                           type="button"
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                          onClick={() =>
-                            setShowConfirmPassword(!showConfirmPassword)
-                          }
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          onClick={() => setShowPassword(!showPassword)}
                         >
-                          {showConfirmPassword ? (
-                            <EyeOff className="h-4 w-4" />
+                          {showPassword ? (
+                            <EyeOff className="h-5 w-5 cursor-pointer" />
                           ) : (
-                            <Eye className="h-4 w-4" />
+                            <Eye className="h-5 w-5 cursor-pointer" />
                           )}
                         </button>
                       </div>
                       <ErrorMessage
-                        name="confirmPassword"
+                        name="password"
                         component="div"
-                        className="text-red-500 text-sm flex items-center mt-1"
+                        className="text-red-500 text-sm mt-1 ml-2"
                       />
                     </div>
-                  )}
 
-                  <Button
-                    type="submit"
-                    className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <div className="flex items-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        {isLogin ? "Signing In..." : "Creating Account..."}
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center">
-                        {isLogin ? "Sign In" : "Create Account"}
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </div>
-                    )}
-                  </Button>
-                </Form>
-              )}
-            </Formik>
-
-            <div className="mt-6 text-center">
-              <button
-                onClick={toggleAuthMode}
-                className="text-orange-600 hover:text-orange-800 text-sm font-medium transition-colors flex items-center justify-center w-full"
-              >
-                {isLogin
-                  ? "Don't have an account? Sign up"
-                  : "Already have an account? Sign in"}
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </button>
+                    <div className="flex align-middle justify-center">
+                      <Button
+                        type="submit"
+                        className="cursor-pointer w-[300px]  bg-orange-500 hover:bg-orange-300 text-white py-8 px-6 rounded-full font-semibold text-base"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <div className="flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                            Creating Account...
+                          </div>
+                        ) : (
+                          "SIGN UP"
+                        )}
+                      </Button>
+                    </div>
+                  </Form>
+                )}
+              </Formik>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

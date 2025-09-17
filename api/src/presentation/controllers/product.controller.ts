@@ -62,4 +62,10 @@ export class ProductController {
     await this._productUsecase.deleteProduct(productId);
     ResponseHandler.success(res, SUCCESS_MESSAGES.DELETE_SUCCESS, null);
   }
+
+  async getProduct(req: Request, res: Response) {
+    const productId = objectIdSchema.parse(req.params.id)
+    const product = await this._productUsecase.getProductById(productId);
+    ResponseHandler.success(res,SUCCESS_MESSAGES.DATA_RETRIEVED,product);
+  }
 }

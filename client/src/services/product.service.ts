@@ -30,5 +30,9 @@ export const productService = {
   deleteProduct : async (id : string) : Promise<ApiResponse<null>> => {
     const response = await axiosInstance.delete(`/product/${id}`);
     return response.data;
+  },
+  getProductById :  async(productId : string) : Promise<ApiResponse>=> {
+    const response = await axiosInstance.get(`/product/${productId}`);
+    return response.data;
   }
 };
