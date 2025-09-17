@@ -49,7 +49,7 @@ export function AddCategoryModal({ open, onOpenChange, onAdd }: AddCategoryModal
           </div>
 
           <div className="flex gap-3 justify-center">
-            <Button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white px-8">
+            <Button type="submit" className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-8">
               ADD
             </Button>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="px-8">

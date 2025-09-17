@@ -432,7 +432,7 @@ export function AddProductModal({
           <div className="flex gap-3 justify-center">
             <Button
               type="submit"
-              className="bg-orange-500 hover:bg-orange-600 text-white px-8"
+              className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-8"
             >
               {editingProduct ? "UPDATE" : "ADD"}
             </Button>
